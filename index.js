@@ -1,4 +1,8 @@
-/// <reference types='cypress' />
+define("node_modules/cypress/types/net-stubbing", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+});
+/// <reference path='../types/index.d.ts' />
 var isMochaFunc = function (fn) { return typeof fn === 'function'; };
 var isMochaTitle = function (title) { return typeof title === 'string'; };
 var isMochaTags = function (title) { return typeof title === 'object'; };
@@ -46,3 +50,7 @@ itWithTags.skip = mochaIt.skip;
 itWithTags.only = mochaIt.only;
 itWithTags.retries = mochaIt.retries;
 it = itWithTags;
+define("src/index", ["require", "exports", "./it"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+});

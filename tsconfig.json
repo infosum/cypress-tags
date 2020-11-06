@@ -10,9 +10,14 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "outDir": "js"
+    "outFile": "index.js",
+    "rootDir": "src",
+    "module": "amd",
   },
   "include": [
     "src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
   ],
 }

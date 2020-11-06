@@ -2,7 +2,7 @@
   "name": "cypress-tags",
   "version": "0.0.4",
   "description": "",
-  "main": "js/index.js",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc"
