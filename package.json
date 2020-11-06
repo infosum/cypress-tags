@@ -11,7 +11,7 @@
   "dependencies": {
     "cypress": "^5.5.0"
   },
-  "types": "types",
+  "types": "./types/index.d.ts",
   "devDependencies": {
     "typescript": "^4.0.5"
   }

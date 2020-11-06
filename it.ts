@@ -1,4 +1,3 @@
-/// <reference path='./types/index.d.ts' />
 /// <reference types='cypress' />
 
 type MochaFunc = Mocha.Func | Mocha.AsyncFunc;
@@ -37,12 +36,8 @@ const itWithTags = (p1: MochaTagsTitleOrFunc, p2: MochaTitleOrFunc, p3: MochaFun
       let includeTest = false;
       let excludeTest = false;
 
-      if (includeTags) {
-        includeTest = tags.some(tag => includeTags.includes(tag));
-      }
-      if (excludeTags) {
-        excludeTest = tags.some(tag => excludeTags.includes(tag));
-      }
+      includeTest = includeTags.length === 0 || tags.some(tag => includeTags.includes(tag));
+      excludeTest = excludeTags.length > 0 && tags.some(tag => excludeTags.includes(tag));
 
       const runTest = includeTest && !excludeTest;
       if (runTest) {
