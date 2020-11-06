@@ -4,8 +4,8 @@ var isMochaTitle = function (title) { return typeof title === 'string'; };
 var isMochaTags = function (title) { return typeof title === 'object'; };
 var mochaIt = it;
 var itWithTags = function (p1, p2, p3) {
-    var includeTags = Cypress.env('TAGS') ? Cypress.env('TAGS').split(',') : [];
-    var excludeTags = Cypress.env('NOT_TAGS') ? Cypress.env('NOT_TAGS').split(',') : [];
+    var includeTags = Cypress.env('INCLUDE_TAGS') ? Cypress.env('INCLUDE_TAGS').split(',') : [];
+    var excludeTags = Cypress.env('EXCLUDE_TAGS') ? Cypress.env('EXCLUDE_TAGS').split(',') : [];
     if (isMochaFunc(p1)) {
         return mochaIt(p1);
     }

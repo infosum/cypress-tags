@@ -1,4 +1,4 @@
-/// <reference types='cypress' />
+/// <reference path='../types/index.d.ts' />
 
 type MochaFunc = Mocha.Func | Mocha.AsyncFunc;
 type MochaTitleOrFunc = string | MochaFunc;
@@ -11,8 +11,8 @@ const isMochaTags = (title: MochaTagsTitleOrFunc): title is string[] => typeof t
 const mochaIt = it;
 
 const itWithTags = (p1: MochaTagsTitleOrFunc, p2: MochaTitleOrFunc, p3: MochaFunc): Mocha.Test => {
-  const includeTags = Cypress.env('TAGS') ? Cypress.env('TAGS').split(',') : [];
-  const excludeTags = Cypress.env('NOT_TAGS') ? Cypress.env('NOT_TAGS').split(',') : [];
+  const includeTags = Cypress.env('INCLUDE_TAGS') ? Cypress.env('INCLUDE_TAGS').split(',') : [];
+  const excludeTags = Cypress.env('EXCLUDE_TAGS') ? Cypress.env('EXCLUDE_TAGS').split(',') : [];
 
   if (isMochaFunc(p1)) {
     return mochaIt(p1);
