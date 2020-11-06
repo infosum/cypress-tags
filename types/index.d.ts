@@ -30,7 +30,7 @@
 // hmm, how to load it better?
 /// <reference path="../node_modules/cypress/types/cypress-npm-api.d.ts" />
 
-/// <reference path="../node_modules/cypress/types/net-stubbing.ts" />
+/// <reference path="../node_modules/cypress/types/net-stubbing.d.ts" />
 /// <reference path="../node_modules/cypress/types/cypress.d.ts" />
 /// <reference path="../node_modules/cypress/types/cypress-global-vars.d.ts" />
 /// <reference path="../node_modules/cypress/types/cypress-type-helpers.d.ts" />

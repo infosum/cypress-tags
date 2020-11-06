@@ -1,23 +1,20 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
     "types": [],
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "outFile": "index.js",
-    "rootDir": "src",
-    "module": "amd",
+    "module": "commonjs",
+    "declaration": true,
+    "outDir": "./dist",
+    "strict": true
   },
   "include": [
     "src/**/*.ts"
   ],
   "exclude": [
     "node_modules",
+    "tests"
   ],
 }

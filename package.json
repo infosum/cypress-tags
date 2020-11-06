@@ -2,17 +2,22 @@
   "name": "cypress-tags",
   "version": "0.0.4",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc"
   },
   "author": "",
   "license": "ISC",
+  "files": [
+    "dist/**/*"
+  ],
+  "prepare": "npm run build",
+  "postversion": "git push && git push --tags",
   "dependencies": {
     "cypress": "^5.5.0"
   },
-  "types": "./types/index.d.ts",
   "devDependencies": {
     "typescript": "^4.0.5"
   }
