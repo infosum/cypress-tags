@@ -9,9 +9,10 @@
     "types": [],
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "outDir": "js"
   },
   "include": [
-    "**/*.ts"
+    "src/**/*.ts"
   ],
 }
