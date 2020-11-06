@@ -11,14 +11,20 @@
   "author": "Anna Thomas",
   "license": "ISC",
   "files": [
-    "dist/**/*"
+    "dist/**/*",
+    "types/**/*"
   ],
   "prepare": "npm run build",
   "postversion": "git push && git push --tags",
+  "repository": {
+      "type": "git",
+      "url": "https://github.com/annaet/cypress-tags.git"
+  },
   "dependencies": {
     "cypress": "^5.5.0"
   },
   "devDependencies": {
     "typescript": "^4.0.5"
-  }
+  },
+  "keywords": ["cypress", "tags", "tagging", "markers", "test", "testing"]
 }
