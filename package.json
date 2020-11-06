@@ -1,14 +1,14 @@
 {
   "name": "cypress-tags",
-  "version": "0.0.4",
-  "description": "",
+  "version": "0.0.5",
+  "description": "Use custom tags to slice up Cypress test runs.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc"
   },
-  "author": "",
+  "author": "Anna Thomas",
   "license": "ISC",
   "files": [
     "dist/**/*"
