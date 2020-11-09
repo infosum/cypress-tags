@@ -15,10 +15,7 @@
 /// <reference path="../node_modules/cypress/types/lodash/index.d.ts" />
 /// <reference path="../node_modules/cypress/types/sinon/index.d.ts" />
 /// <reference path="../node_modules/cypress/types/sinon-chai/index.d.ts" />
-
-// Override mocha types reference with our own definitions
-/// <reference path="./mocha.d.ts" />
-
+/// <reference path="../node_modules/cypress/types/mocha/index.d.ts" />
 /// <reference path="../node_modules/cypress/types/jquery/index.d.ts" />
 /// <reference path="../node_modules/cypress/types/chai-jquery/index.d.ts" />
 
@@ -35,3 +32,6 @@
 /// <reference path="../node_modules/cypress/types/cypress-global-vars.d.ts" />
 /// <reference path="../node_modules/cypress/types/cypress-type-helpers.d.ts" />
 /// <reference path="../node_modules/cypress/types/cypress-expect.d.ts" />
+
+// Add tags to mocha definitions
+/// <reference path="./cypress-tags.d.ts" />
