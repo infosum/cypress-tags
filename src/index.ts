@@ -1,9 +1,5 @@
 /// <reference path='../types/index.d.ts' />
 
-type MochaFns = 'it' | 'describe';
-type MochaSubFns = 'only' | 'skip';
-type MochaFnType = Mocha.TestFunction | Mocha.ExclusiveTestFunction | Mocha.PendingTestFunction | Mocha.SuiteFunction | Mocha.ExclusiveSuiteFunction | Mocha.PendingSuiteFunction;
-
 const isMochaTags = (tags: any): tags is string[] => typeof tags === 'object';
 
 const mochaDescribe = describe;
@@ -22,8 +18,8 @@ const extractTags = () => {
 const filterTest = (
   args: any[],
   origFn: MochaFnType,
-  fnName?: string,
-  subFn?: MochaSubFns,
+  skipIfUntagged?: boolean,
+  subFnName?: MochaSubFns,
 ): Mocha.Test | Mocha.Suite | undefined => {
   const { includeTags, excludeTags } = extractTags();
 
@@ -41,14 +37,14 @@ const filterTest = (
       const runTest = includeTest && !excludeTest;
       if (runTest) {
         // Include tag found, run test
-        if (fnName === 'it' && args[1] === 'I am a wip smoke test') {
-          // throw new Error(...args);
-        }
+
         // Weird edge case found in Cypress code too
         // See packages/driver/src/cypress/mocha.js line #76
-        if (subFn === 'only') {
-          // throw new Error(origFn as unknown as string);
+        // Haven't figured out how to make this work yet
+        if (subFnName === 'only') {
+          throw new Error('.only currently unsupported');
         }
+
         // @ts-ignore
         return origFn(...cypressArgs);
       } else {
@@ -62,7 +58,7 @@ const filterTest = (
     }
   }
 
-  if (includeTags.length) {
+  if (includeTags.length && skipIfUntagged) {
     // If include tags have been provided, skip any untagged tests
     return;
   }
@@ -71,37 +67,27 @@ const filterTest = (
   return origFn(...args);
 };
 
-const overloadMochaFnForTags = (fnName: MochaFns) => {
+const overloadMochaFnForTags = (fnName: MochaFns, skipIfUntagged?: boolean) => {
   const _fn = window[fnName];
 
   const overrideFn = (fn: any) => {
     window[fnName] = fn();
     (window[fnName]).only = fn('only');
     (window[fnName]).skip = fn('skip');
-    // if ((window[fnName]).retries) {
-    //   (window[fnName]).retries = fn('retries');
-    // }
   };
 
   overrideFn((subFn?: MochaSubFns) => {
     return (...args: any[]) => {
       const origFn = subFn ? _fn[subFn] : _fn;
-      // const origFn = _fn;
-      return filterTest(args, origFn, fnName, subFn);
+      return filterTest(args, origFn, skipIfUntagged, subFn);
     };
   });
 };
 
-overloadMochaFnForTags('it');
+overloadMochaFnForTags('it', true);
+overloadMochaFnForTags('test', true);
+overloadMochaFnForTags('specify', true);
+
 overloadMochaFnForTags('describe');
-
-// Pass through OG mocha it methods
-// describeWithTags.skip = mochaDescribe.skip;
-// describeWithTags.only = mochaDescribe.only;
-// itWithTags.skip = mochaIt.skip;
-// itWithTags.only = mochaIt.only;
-// itWithTags.retries = mochaIt.retries;
-
-// // Overwrite globals
-// describe = describeWithTags as Mocha.SuiteFunction;
-// it = itWithTags as Mocha.TestFunction;
+overloadMochaFnForTags('context');
+overloadMochaFnForTags('suite');

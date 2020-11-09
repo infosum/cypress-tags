@@ -37,9 +37,23 @@ declare namespace Mocha {
 declare global {
   interface Window {
     it: Mocha.TestFunction;
+    test: Mocha.TestFunction;
+    specify: Mocha.TestFunction;
+
     describe: Mocha.SuiteFunction;
+    context: Mocha.SuiteFunction;
+    suite: Mocha.SuiteFunction;
   }
 }
 
+type MochaFns = 'it' | 'test' | 'specify' | 'describe' | 'context' | 'suite';
+type MochaSubFns = 'only' | 'skip';
+type MochaFnType = Mocha.TestFunction | Mocha.ExclusiveTestFunction | Mocha.PendingTestFunction | Mocha.SuiteFunction | Mocha.ExclusiveSuiteFunction | Mocha.PendingSuiteFunction;
+
 window.it = window.it || {};
+window.test = window.it || {};
+window.specify = window.it || {};
+
 window.describe = window.describe || {};
+window.context = window.context || {};
+window.suite = window.suite || {};
