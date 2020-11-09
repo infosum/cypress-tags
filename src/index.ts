@@ -18,8 +18,8 @@ const extractTags = () => {
 const filterTest = (
   args: any[],
   origFn: MochaFnType,
+  subFnName?: MochaSubFnName,
   skipIfUntagged?: boolean,
-  subFnName?: MochaSubFns,
 ): Mocha.Test | Mocha.Suite | undefined => {
   const { includeTags, excludeTags } = extractTags();
 
@@ -35,6 +35,7 @@ const filterTest = (
       excludeTest = excludeTags.length > 0 && tags.some(tag => excludeTags.includes(tag));
 
       const runTest = includeTest && !excludeTest;
+
       if (runTest) {
         // Include tag found, run test
 
@@ -67,7 +68,7 @@ const filterTest = (
   return origFn(...args);
 };
 
-const overloadMochaFnForTags = (fnName: MochaFns, skipIfUntagged?: boolean) => {
+const overloadMochaFnForTags = (fnName: MochaFnName, skipIfUntagged?: boolean) => {
   const _fn = window[fnName];
 
   const overrideFn = (fn: any) => {
@@ -76,10 +77,10 @@ const overloadMochaFnForTags = (fnName: MochaFns, skipIfUntagged?: boolean) => {
     (window[fnName]).skip = fn('skip');
   };
 
-  overrideFn((subFn?: MochaSubFns) => {
+  overrideFn((subFn?: MochaSubFnName) => {
     return (...args: any[]) => {
       const origFn = subFn ? _fn[subFn] : _fn;
-      return filterTest(args, origFn, skipIfUntagged, subFn);
+      return filterTest(args, origFn, subFn, skipIfUntagged);
     };
   });
 };

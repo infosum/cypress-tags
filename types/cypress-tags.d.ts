@@ -46,8 +46,8 @@ declare global {
   }
 }
 
-type MochaFns = 'it' | 'test' | 'specify' | 'describe' | 'context' | 'suite';
-type MochaSubFns = 'only' | 'skip';
+type MochaFnName = 'it' | 'test' | 'specify' | 'describe' | 'context' | 'suite';
+type MochaSubFnName = 'only' | 'skip';
 type MochaFnType = Mocha.TestFunction | Mocha.ExclusiveTestFunction | Mocha.PendingTestFunction | Mocha.SuiteFunction | Mocha.ExclusiveSuiteFunction | Mocha.PendingSuiteFunction;
 
 window.it = window.it || {};

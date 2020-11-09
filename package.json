@@ -25,6 +25,8 @@
     "cypress": "^5.5.0"
   },
   "devDependencies": {
+    "@cypress/browserify-preprocessor": "^3.0.1",
+    "@types/through": "0.0.30",
     "typescript": "^4.0.5"
   },
   "keywords": [
