@@ -1,3 +1,5 @@
+/// <reference path="../types/index.d.ts" />
+
 import through from 'through';
 import ts, { factory } from 'typescript';
 
