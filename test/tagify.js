@@ -1,7 +1,7 @@
 const through = require('through');
 const browserify = require('browserify');
 const expect = require('chai').expect;
-const transform = require('../dist/tagify').transform;
+const transform = require('../dist').transform;
 
 const tagify = () => {
   return new Promise((resolve) => {

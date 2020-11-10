@@ -22,10 +22,11 @@
     "url": "https://github.com/annaet/cypress-tags.git"
   },
   "dependencies": {
-    "cypress": "^5.5.0"
+    "@cypress/browserify-preprocessor": "^3.0.1",
+    "cypress": "^5.5.0",
+    "through": "^2.3.8"
   },
   "devDependencies": {
-    "@cypress/browserify-preprocessor": "^3.0.1",
     "@types/through": "0.0.30",
     "chai": "^4.2.0",
     "mocha": "^8.2.1",
