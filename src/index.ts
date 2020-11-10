@@ -1,13 +1,20 @@
-/// <reference path='../types/index.d.ts' />
+import through from 'through';
+import ts, { factory } from 'typescript';
 
-const isMochaTags = (tags: any): tags is string[] => typeof tags === 'object';
+const browserify = require('@cypress/browserify-preprocessor');
 
-const mochaDescribe = describe;
-const mochaIt = it;
+const isTestBlock = (name: string) => (node: ts.CallExpression | ts.PropertyAccessExpression) => {
+  return ts.isIdentifier(node.expression) &&
+    node.expression.escapedText === name;
+};
+
+const isDescribe = isTestBlock('describe');
+const isContext = isTestBlock('context');
+const isIt = isTestBlock('it');
 
 const extractTags = () => {
-  const includeTags = Cypress.env('INCLUDE_TAGS') ? Cypress.env('INCLUDE_TAGS').split(',') : [];
-  const excludeTags = Cypress.env('EXCLUDE_TAGS') ? Cypress.env('EXCLUDE_TAGS').split(',') : [];
+  const includeTags = process.env.CYPRESS_INCLUDE_TAGS ? process.env.CYPRESS_INCLUDE_TAGS.split(',') : [];
+  const excludeTags = process.env.CYPRESS_EXCLUDE_TAGS ? process.env.CYPRESS_EXCLUDE_TAGS.split(',') : [];
 
   return {
     includeTags,
@@ -15,80 +22,143 @@ const extractTags = () => {
   };
 };
 
-const filterTest = (
-  args: any[],
-  origFn: MochaFnType,
-  subFnName?: MochaSubFnName,
-  skipIfUntagged?: boolean,
-): Mocha.Test | Mocha.Suite | undefined => {
-  const { includeTags, excludeTags } = extractTags();
+const calculateSkipChildren = (includeTags: string[], excludeTags: string[], tags: string[]): boolean => {
+  const includeTest = includeTags.length === 0 || tags.some(tag => includeTags.includes(tag));
+  const excludeTest = excludeTags.length > 0 && tags.some(tag => excludeTags.includes(tag));
 
-  if (isMochaTags(args[0])) {
-    const tags = args[0];
-    const cypressArgs = args.slice(1);
+  return !(includeTest && !excludeTest);
+}
 
-    if (includeTags.length || excludeTags.length) {
-      let includeTest = false;
-      let excludeTest = false;
+const removeTagsFromNode = (node: ts.Node, parentTags: string[], includeTags: string[], excludeTags: string[]): {
+  node: ts.Node,
+  tags: string[],
+  skipChildren: boolean,
+} => {
+  if (ts.isCallExpression(node)) {
+    const firstArg = node.arguments[0];
+    if (ts.isArrayLiteralExpression(firstArg)) {
+      const nodeTags = firstArg.elements.map((element: any) => element.text);
+      const uniqueTags = [...new Set([...nodeTags, ...parentTags])];
+      const skipChildren = calculateSkipChildren(includeTags, excludeTags, uniqueTags);
 
-      includeTest = includeTags.length === 0 || tags.some(tag => includeTags.includes(tag));
-      excludeTest = excludeTags.length > 0 && tags.some(tag => excludeTags.includes(tag));
-
-      const runTest = includeTest && !excludeTest;
-
-      if (runTest) {
-        // Include tag found, run test
-
-        // Weird edge case found in Cypress code too
-        // See packages/driver/src/cypress/mocha.js line #76
-        // Haven't figured out how to make this work yet
-        if (subFnName === 'only') {
-          throw new Error('.only currently unsupported');
-        }
-
-        // @ts-ignore
-        return origFn(...cypressArgs);
-      } else {
-        // Include tag not found or excluded tag found, skip test
-        return;
-      }
-    } else {
-      // If not tags have been provided, run all tests
-      // @ts-ignore
-      return origFn(...cypressArgs);
+      // Create a new node removing the tag list as the first argument
+      const newArgs: ts.NodeArray<ts.Expression> = factory.createNodeArray([...node.arguments.slice(1)]);
+      const newExpression = factory.createCallExpression(node.expression, undefined, newArgs);
+      return {
+        node: newExpression,
+        tags: uniqueTags,
+        skipChildren,
+      };
     }
   }
+  return {
+    node,
+    tags: parentTags,
+    skipChildren: false,
+  };
+}
 
-  if (includeTags.length && skipIfUntagged) {
-    // If include tags have been provided, skip any untagged tests
-    return;
-  }
+const transformer = <T extends ts.Node>(context: ts.TransformationContext) => (rootNode: T) => {
+  const { includeTags, excludeTags } = extractTags();
 
-  // @ts-ignore
-  return origFn(...args);
-};
+  const visit = (node: ts.Node, parentTags?: string[]): ts.Node | undefined => {
+    let tags: string[] = parentTags ?? [];
+    let returnNode = node;
 
-const overloadMochaFnForTags = (fnName: MochaFnName, skipIfUntagged?: boolean) => {
-  const _fn = window[fnName];
+    let skipChildren = false;
 
-  const overrideFn = (fn: any) => {
-    window[fnName] = fn();
-    (window[fnName]).only = fn('only');
-    (window[fnName]).skip = fn('skip');
+    if (ts.isCallExpression(node)) {
+      const firstArg = node.arguments[0];
+
+      if (ts.isIdentifier(node.expression)) {
+        if (isDescribe(node) || isContext(node)) {
+          if (ts.isArrayLiteralExpression(firstArg)) {
+            // First arg is tags list
+            const result = removeTagsFromNode(node, tags, includeTags, excludeTags);
+            skipChildren = result.skipChildren;
+            returnNode = result.node;
+            tags = result.tags;
+          }
+        } else if (isIt(node)) {
+          if (ts.isStringLiteral(firstArg)) {
+            // First arg is title
+            skipChildren = calculateSkipChildren(includeTags, excludeTags, tags);
+          } else if (ts.isArrayLiteralExpression(firstArg)) {
+            // First arg is tags list
+            const result = removeTagsFromNode(node, tags, includeTags, excludeTags);
+            skipChildren = result.skipChildren;
+            returnNode = result.node;
+          }
+        }
+      } else if (ts.isPropertyAccessExpression(node.expression)) {
+        // Node contains a .skip or .only
+        if (isIt(node.expression)) {
+          if (ts.isArrayLiteralExpression(firstArg)) {
+            // First arg is tags list
+            const result = removeTagsFromNode(node, tags, includeTags, excludeTags);
+            skipChildren = result.skipChildren;
+            returnNode = result.node;
+          }
+        }
+      }
+    }
+
+    if (skipChildren) {
+      returnNode = factory.createEmptyStatement();
+    } else {
+      returnNode = ts.visitEachChild(returnNode, (node) => visit(node, tags), context);
+    }
+
+    return returnNode;
   };
 
-  overrideFn((subFn?: MochaSubFnName) => {
-    return (...args: any[]) => {
-      const origFn = subFn ? _fn[subFn] : _fn;
-      return filterTest(args, origFn, subFn, skipIfUntagged);
-    };
-  });
+  return ts.visitNode(rootNode, visit);
 };
 
-overloadMochaFnForTags('it', true);
-overloadMochaFnForTags('test', true);
-overloadMochaFnForTags('specify', true);
+const processFile = (fileName: string, source: string) => {
+  const printer = ts.createPrinter();
 
-overloadMochaFnForTags('describe');
-overloadMochaFnForTags('context');
-overloadMochaFnForTags('suite');
+  const sourceFile = ts.createSourceFile(fileName, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+
+  const transformedResult = ts.transform<ts.SourceFile>(sourceFile, [transformer]);
+  const transformedSourceFile: ts.SourceFile = transformedResult.transformed[0];
+  const result = printer.printFile(transformedSourceFile);
+
+  return result;
+};
+
+const transform = (fileName: string) => {
+  let data = '';
+
+  function ondata (d: through.ThroughStream) {
+    data += d;
+  }
+
+  function onend (this: through.ThroughStream) {
+    this.queue(processFile(fileName, data));
+    this.emit('end');
+  }
+
+  return through(ondata, onend);
+};
+
+const preprocessor = () => {
+  const options = {
+    ...browserify.defaultOptions,
+    typescript: require.resolve('typescript'),
+    browserifyOptions: {
+      ...browserify.defaultOptions.browserifyOptions,
+      extensions: ['.ts'],
+      transform: [
+        ...browserify.defaultOptions.browserifyOptions.transform,
+        (fileName: string) => transform(fileName),
+      ],
+    },
+  };
+
+  return browserify(options);
+};
+
+preprocessor.transform = transform;
+
+module.exports = preprocessor;
