@@ -4,117 +4,77 @@ import ts, { factory } from 'typescript';
 const browserify = require('@cypress/browserify-preprocessor');
 
 const isTestBlock = (name: string) => (node: ts.Node) => {
-  return ts.isExpressionStatement(node) &&
-    ts.isCallExpression(node.expression) &&
-    ts.isIdentifier(node.expression.expression) &&
-    node.expression.expression.escapedText === name;
+  return ts.isCallExpression(node) &&
+    ts.isIdentifier(node.expression) &&
+    node.expression.escapedText === name;
 };
 
 const isDescribe = isTestBlock('describe');
 const isContext = isTestBlock('context');
 const isIt = isTestBlock('it');
 
-const parseChildren = (nodes: ts.Node, parentTags: string[]) => {
-  nodes.forEachChild((node) => {
-    // Check child nodes have correct types
-    if (ts.isExpressionStatement(node) && ts.isCallExpression(node.expression) && ts.isIdentifier(node.expression.expression)) {
-      const firstArg = node.expression.arguments[0];
+const transformer = <T extends ts.Node>(context: ts.TransformationContext) => (rootNode: T) => {
+  const visit = (node: ts.Node, parentTags?: string[]): ts.Node => {
+
+    let tags: string[] = parentTags ?? [];
+    let returnNode = node;
+
+    if (ts.isCallExpression(node) && ts.isIdentifier(node.expression)) {
+      const firstArg = node.arguments[0];
+      // console.log(ts.SyntaxKind[firstArg.kind]);
+      // console.log(ts.isArrayLiteralExpression(firstArg));
 
       if (isDescribe(node) || isContext(node)) {
-        if (ts.isStringLiteral(firstArg)) {
-          // First arg is title
-
-          const fn = node.expression.arguments[1];
-          if (ts.isArrowFunction(fn)) {
-            // Second arg is the test group function
-            parseChildren(fn.body, parentTags);
-          } else {
-            throw new Error('Unexpected second argument');
-          }
-
-        } else if (ts.isArrayLiteralExpression(firstArg)) {
+        if (ts.isArrayLiteralExpression(firstArg)) {
           // First arg is tags list
-
-          const fn = node.expression.arguments[2];
-          if (ts.isArrowFunction(fn)) {
-            // Third arg is the test group function
-            const newTags = firstArg.elements.map((element: any) => element.text);
-            const tags = [...parentTags, ...newTags];
-            parseChildren(fn.body, tags);
-          } else {
-            throw new Error('Unexpected third argument');
-          }
-
-        } else {
-          throw new Error('Unexpected first argument');
+          const newTags = firstArg.elements.map((element: any) => element.text);
+          tags = [...(parentTags ?? []), ...newTags];
         }
-
       } else if (isIt(node)) {
         if (ts.isStringLiteral(firstArg)) {
           // First arg is title
-
-          if (parentTags.length) {
+          if (parentTags?.length) {
             // Create a new node with parent tag list as the first argument
-            const transformerFactory = () => {
-              return (rootNode: ts.ExpressionStatement) => {
-                const elements = parentTags.map((tag) => factory.createStringLiteral(tag));
-                const tagsArg = factory.createArrayLiteralExpression(elements, false);
+            const elements = parentTags.map((tag) => factory.createStringLiteral(tag, true));
+            const tagsArg = factory.createArrayLiteralExpression(elements, false);
 
-                if (ts.isCallExpression(rootNode.expression)) {
-                  const newArgs: ts.NodeArray<ts.Expression> = factory.createNodeArray([tagsArg, ...rootNode.expression.arguments]);
-                  const newExpression = factory.createCallExpression(rootNode.expression.expression, undefined, newArgs);
-                  const newExpressionStatement = factory.createExpressionStatement(newExpression);
-                  return newExpressionStatement;
-                } else {
-                  return rootNode;
-                }
-              }
-            }
-
-            ts.transform(node, [transformerFactory]);
+            const newArgs: ts.NodeArray<ts.Expression> = factory.createNodeArray([tagsArg, ...node.arguments]);
+            const newExpression = factory.createCallExpression(node.expression, undefined, newArgs);
+            ts.setSourceMapRange(newExpression, ts.getSourceMapRange(node))
+            returnNode = newExpression;
           }
-
         } else if (ts.isArrayLiteralExpression(firstArg)) {
           // First arg is tags list
-
-          if (parentTags.length) {
+          if (parentTags?.length) {
             // Create a new node with combined tag lists as the first argument
-            const transformerFactory = () => {
-              return (rootNode: ts.ExpressionStatement) => {
-                const nodeTags = firstArg.elements.map((element: any) => element.text);
-                const uniqueTags = [...new Set([...nodeTags, ...parentTags])];
-                const elements = uniqueTags.map((tag) => factory.createStringLiteral(tag));
-                const tagsArg = factory.createArrayLiteralExpression(elements, false);
+            const nodeTags = firstArg.elements.map((element: any) => element.text);
+            const uniqueTags = [...new Set([...nodeTags, ...parentTags])];
+            const elements = uniqueTags.map((tag) => factory.createStringLiteral(tag, true));
+            const tagsArg = factory.createArrayLiteralExpression(elements, false);
 
-                if (ts.isCallExpression(rootNode.expression)) {
-                  const newArgs: ts.NodeArray<ts.Expression> = factory.createNodeArray([tagsArg, ...rootNode.expression.arguments]);
-                  const newExpression = factory.createCallExpression(rootNode.expression.expression, undefined, newArgs);
-                  const newExpressionStatement = factory.createExpressionStatement(newExpression);
-                  return newExpressionStatement;
-                } else {
-                  return rootNode;
-                }
-              }
-            }
-
-            ts.transform(node, [transformerFactory]);
+            const newArgs: ts.NodeArray<ts.Expression> = factory.createNodeArray([tagsArg, ...node.arguments.slice(1)]);
+            const newExpression = factory.createCallExpression(node.expression, undefined, newArgs);
+            returnNode = newExpression;
           }
-
-        } else {
-          throw new Error('Unexpected first argument');
         }
-
       }
     }
-  });
+
+    returnNode = ts.visitEachChild(returnNode, (node) => visit(node, tags), context);
+
+    return returnNode;
+  };
+  return ts.visitNode(rootNode, visit);
 };
 
 const process = (fileName: string, source: string) => {
-  const nodes = ts.createSourceFile(fileName, source, ts.ScriptTarget.Latest);
-  parseChildren(nodes, []);
-
   const printer = ts.createPrinter();
-  const result = printer.printNode(ts.EmitHint.Unspecified, nodes, nodes);
+
+  const sourceFile = ts.createSourceFile(fileName, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+
+  const transformedResult = ts.transform<ts.SourceFile>(sourceFile, [transformer]);
+  const transformedSourceFile: ts.SourceFile = transformedResult.transformed[0];
+  const result = printer.printFile(transformedSourceFile);
 
   return result;
 };
@@ -151,4 +111,7 @@ const onFilePreprocessor = () => {
   return browserify(options);
 };
 
-module.exports = onFilePreprocessor;
+module.exports = {
+  onFilePreprocessor,
+  transform,
+};
