@@ -21,8 +21,6 @@ const transformer = <T extends ts.Node>(context: ts.TransformationContext) => (r
 
     if (ts.isCallExpression(node) && ts.isIdentifier(node.expression)) {
       const firstArg = node.arguments[0];
-      // console.log(ts.SyntaxKind[firstArg.kind]);
-      // console.log(ts.isArrayLiteralExpression(firstArg));
 
       if (isDescribe(node) || isContext(node)) {
         if (ts.isArrayLiteralExpression(firstArg)) {
