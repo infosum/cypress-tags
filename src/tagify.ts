@@ -22,6 +22,13 @@ const extractTags = () => {
   };
 };
 
+const calculateSkipChildren = (includeTags: string[], excludeTags: string[], tags: string[]): boolean => {
+  const includeTest = includeTags.length === 0 || tags.some(tag => includeTags.includes(tag));
+  const excludeTest = excludeTags.length > 0 && tags.some(tag => excludeTags.includes(tag));
+
+  return !(includeTest && !excludeTest);
+}
+
 const removeTagsFromNode = (node: ts.Node, parentTags: string[], includeTags: string[], excludeTags: string[]): {
   node: ts.Node,
   tags: string[],
@@ -32,11 +39,7 @@ const removeTagsFromNode = (node: ts.Node, parentTags: string[], includeTags: st
     if (ts.isArrayLiteralExpression(firstArg)) {
       const nodeTags = firstArg.elements.map((element: any) => element.text);
       const uniqueTags = [...new Set([...nodeTags, ...parentTags])];
-
-      const includeTest = includeTags.length === 0 || uniqueTags.some(tag => includeTags.includes(tag));
-      const excludeTest = excludeTags.length > 0 && uniqueTags.some(tag => excludeTags.includes(tag));
-
-      const skipChildren = !(includeTest && !excludeTest);
+      const skipChildren = calculateSkipChildren(includeTags, excludeTags, uniqueTags);
 
       // Create a new node removing the tag list as the first argument
       const newArgs: ts.NodeArray<ts.Expression> = factory.createNodeArray([...node.arguments.slice(1)]);
@@ -79,10 +82,7 @@ const transformer = <T extends ts.Node>(context: ts.TransformationContext) => (r
         } else if (isIt(node)) {
           if (ts.isStringLiteral(firstArg)) {
             // First arg is title
-            const includeTest = includeTags.length === 0 || tags.some(tag => includeTags.includes(tag));
-            const excludeTest = excludeTags.length > 0 && tags.some(tag => excludeTags.includes(tag));
-
-            skipChildren = !(includeTest && !excludeTest);
+            skipChildren = calculateSkipChildren(includeTags, excludeTags, tags);
           } else if (ts.isArrayLiteralExpression(firstArg)) {
             // First arg is tags list
             const result = removeTagsFromNode(node, tags, includeTags, excludeTags);
