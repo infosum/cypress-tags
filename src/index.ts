@@ -14,9 +14,9 @@ const isDescribe = isTestBlock('describe');
 const isContext = isTestBlock('context');
 const isIt = isTestBlock('it');
 
-const extractTags = () => {
-  const includeTags = process.env.CYPRESS_INCLUDE_TAGS ? process.env.CYPRESS_INCLUDE_TAGS.split(',') : [];
-  const excludeTags = process.env.CYPRESS_EXCLUDE_TAGS ? process.env.CYPRESS_EXCLUDE_TAGS.split(',') : [];
+const extractTags = (config: Cypress.PluginConfigOptions) => {
+  const includeTags = config.env.CYPRESS_INCLUDE_TAGS ? config.env.CYPRESS_INCLUDE_TAGS.split(',') : [];
+  const excludeTags = config.env.CYPRESS_EXCLUDE_TAGS ? config.env.CYPRESS_EXCLUDE_TAGS.split(',') : [];
 
   return {
     includeTags,
@@ -60,8 +60,8 @@ const removeTagsFromNode = (node: ts.Node, parentTags: string[], includeTags: st
   };
 }
 
-const transformer = <T extends ts.Node>(context: ts.TransformationContext) => (rootNode: T) => {
-  const { includeTags, excludeTags } = extractTags();
+const transformer = (config: Cypress.PluginConfigOptions) => <T extends ts.Node>(context: ts.TransformationContext) => (rootNode: T) => {
+  const { includeTags, excludeTags } = extractTags(config);
 
   const visit = (node: ts.Node, parentTags?: string[]): ts.Node | undefined => {
     let tags: string[] = parentTags ?? [];
@@ -117,19 +117,19 @@ const transformer = <T extends ts.Node>(context: ts.TransformationContext) => (r
   return ts.visitNode(rootNode, visit);
 };
 
-const processFile = (fileName: string, source: string) => {
+const processFile = (fileName: string, source: string, config: Cypress.PluginConfigOptions) => {
   const printer = ts.createPrinter();
 
   const sourceFile = ts.createSourceFile(fileName, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
 
-  const transformedResult = ts.transform<ts.SourceFile>(sourceFile, [transformer]);
+  const transformedResult = ts.transform<ts.SourceFile>(sourceFile, [transformer(config)]);
   const transformedSourceFile: ts.SourceFile = transformedResult.transformed[0];
   const result = printer.printFile(transformedSourceFile);
 
   return result;
 };
 
-const transform = (fileName: string) => {
+const transform = (fileName: string, config: Cypress.PluginConfigOptions) => {
   let data = '';
 
   function ondata (d: through.ThroughStream) {
@@ -137,14 +137,14 @@ const transform = (fileName: string) => {
   }
 
   function onend (this: through.ThroughStream) {
-    this.queue(processFile(fileName, data));
+    this.queue(processFile(fileName, data, config));
     this.emit('end');
   }
 
   return through(ondata, onend);
 };
 
-const preprocessor = () => {
+const preprocessor = (config: Cypress.PluginConfigOptions) => {
   const options = {
     ...browserify.defaultOptions,
     typescript: require.resolve('typescript'),
@@ -153,7 +153,7 @@ const preprocessor = () => {
       extensions: ['.ts'],
       transform: [
         ...browserify.defaultOptions.browserifyOptions.transform,
-        (fileName: string) => transform(fileName),
+        (fileName: string) => transform(fileName, config),
       ],
     },
   };

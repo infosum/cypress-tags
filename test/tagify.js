@@ -3,7 +3,7 @@ const browserify = require('browserify');
 const expect = require('chai').expect;
 const transform = require('../dist').transform;
 
-const tagify = () => {
+const tagify = (config) => {
   return new Promise((resolve) => {
     const options = {
       ...browserify.defaultOptions,
@@ -12,7 +12,7 @@ const tagify = () => {
 
     try {
       browserify(options)
-        .transform(transform)
+        .transform((fileName) => transform(fileName, config))
         .add(__dirname + '/../example/sample.ts')
         .bundle()
         .pipe(through(ondata, onend));
@@ -36,15 +36,18 @@ const tagify = () => {
 
 describe('Tagify', function() {
   let output = '';
+  let config = {
+    env: {},
+  };
 
   beforeEach(() => {
-    delete process.env.CYPRESS_INCLUDE_TAGS;
-    delete process.env.CYPRESS_EXCLUDE_TAGS;
+    delete config.env.CYPRESS_INCLUDE_TAGS;
+    delete config.env.CYPRESS_EXCLUDE_TAGS;
   });
 
   describe('No tags provided', () => {
     before(async () => {
-      output = await tagify();
+      output = await tagify(config);
     });
 
     it('should output all tests without tags', function() {
@@ -72,8 +75,8 @@ describe('Tagify', function() {
 
   describe('Include tags provided', () => {
     before(async () => {
-      process.env.CYPRESS_INCLUDE_TAGS='wip';
-      output = await tagify();
+      config.env.CYPRESS_INCLUDE_TAGS='wip';
+      output = await tagify(config);
     });
 
     it('should output all tests without tags', function() {
@@ -101,8 +104,8 @@ describe('Tagify', function() {
 
   describe('Exclude tags provided', () => {
     before(async () => {
-      process.env.CYPRESS_EXCLUDE_TAGS='wip';
-      output = await tagify();
+      config.env.CYPRESS_EXCLUDE_TAGS='wip';
+      output = await tagify(config);
     });
 
     it('should output all tests without tags', function() {
@@ -125,9 +128,9 @@ describe('Tagify', function() {
 
   describe('Include and exclude tags provided', () => {
     before(async () => {
-      process.env.CYPRESS_INCLUDE_TAGS='smoke,regression';
-      process.env.CYPRESS_EXCLUDE_TAGS='wip';
-      output = await tagify();
+      config.env.CYPRESS_INCLUDE_TAGS='smoke,regression';
+      config.env.CYPRESS_EXCLUDE_TAGS='wip';
+      output = await tagify(config);
     });
 
     it('should output all tests without tags', function() {
