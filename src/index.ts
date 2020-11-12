@@ -48,12 +48,14 @@ const removeTagsFromNode = (node: ts.Node, parentTags: string[], includeTags: st
         }
         return '';
       }).filter((tag) => tag !== '');
+
       const uniqueTags = [...new Set([...nodeTags, ...parentTags])];
       const skipChildren = calculateSkipChildren(includeTags, excludeTags, uniqueTags);
 
       // Create a new node removing the tag list as the first argument
       const newArgs: ts.NodeArray<ts.Expression> = factory.createNodeArray([...node.arguments.slice(1)]);
       const newExpression = factory.createCallExpression(node.expression, undefined, newArgs);
+
       return {
         node: newExpression,
         tags: uniqueTags,

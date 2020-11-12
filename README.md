@@ -58,3 +58,33 @@ Combine the two for more complex testing strategies.
 ```bash
 CYPRESS_INCLUDE_TAGS=smoke,regression CYPRESS_EXCLUDE_TAGS=wip npx cypress run
 ```
+
+## Using enums as tags
+
+If you have tags defines on an enum you can use them in your tags list.
+
+```ts
+enum Tag {
+  'WIP' = 0,
+  'REGRESSION' = 1,
+  'SMOKE' = 2,
+  'FEATURE' = 3,
+};
+
+describe([Tag.WIP], 'Run tests with tagged describe block', () => {
+  it('I will become a wip test', () => {});
+  it([Tag.FEATURE], 'I will also become a wip test', () => {});
+  it([Tag.WIP], 'I am already a wip test', () => {});
+  it.skip('I should always be skipped', () => {});
+});
+```
+
+To account for numeric enums the enum **member name** is used as the tag instead of the value.
+
+This means to run the tests above tagged with `Tag.WIP` you would use the string `WIP` as your include tag, instead of the enum value `0`.
+
+For example:
+
+```bash
+CYPRESS_INCLUDE_TAGS=WIP npx cypress run
+```
