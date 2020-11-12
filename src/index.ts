@@ -3,7 +3,7 @@
 import through from 'through';
 import ts, { factory } from 'typescript';
 
-const browserify = require('@cypress/browserify-preprocessor');
+import browserify from '@cypress/browserify-preprocessor';
 
 const isTestBlock = (name: string) => (node: ts.CallExpression | ts.PropertyAccessExpression) => {
   return ts.isIdentifier(node.expression) &&
@@ -39,7 +39,15 @@ const removeTagsFromNode = (node: ts.Node, parentTags: string[], includeTags: st
   if (ts.isCallExpression(node)) {
     const firstArg = node.arguments[0];
     if (ts.isArrayLiteralExpression(firstArg)) {
-      const nodeTags = firstArg.elements.map((element: any) => element.text);
+      const nodeTags = firstArg.elements.map((element) => {
+        if (ts.isStringLiteral(element)) {
+          return element.text;
+        } else if (ts.isPropertyAccessExpression(element)) {
+          // Return enum's string value, eg. Tag.WIP => "WIP"
+          return element.name.escapedText as string;
+        }
+        return '';
+      }).filter((tag) => tag !== '');
       const uniqueTags = [...new Set([...nodeTags, ...parentTags])];
       const skipChildren = calculateSkipChildren(includeTags, excludeTags, uniqueTags);
 
