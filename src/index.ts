@@ -3,7 +3,7 @@
 import through from 'through';
 import ts, { factory } from 'typescript';
 
-const browserify = require('@cypress/browserify-preprocessor');
+import browserify from '@cypress/browserify-preprocessor';
 
 const isTestBlock = (name: string) => (node: ts.CallExpression | ts.PropertyAccessExpression) => {
   return ts.isIdentifier(node.expression) &&
@@ -14,9 +14,11 @@ const isDescribe = isTestBlock('describe');
 const isContext = isTestBlock('context');
 const isIt = isTestBlock('it');
 
-const extractTags = () => {
-  const includeTags = process.env.CYPRESS_INCLUDE_TAGS ? process.env.CYPRESS_INCLUDE_TAGS.split(',') : [];
-  const excludeTags = process.env.CYPRESS_EXCLUDE_TAGS ? process.env.CYPRESS_EXCLUDE_TAGS.split(',') : [];
+const extractTags = (config: Cypress.PluginConfigOptions) => {
+  const includeEnvVar = config.env.CYPRESS_INCLUDE_TAGS ?? process.env.CYPRESS_INCLUDE_TAGS;
+  const excludeEnvVar = config.env.CYPRESS_EXCLUDE_TAGS ?? process.env.CYPRESS_EXCLUDE_TAGS;
+  const includeTags = includeEnvVar ? includeEnvVar.split(',') : [];
+  const excludeTags = excludeEnvVar ? excludeEnvVar.split(',') : [];
 
   return {
     includeTags,
@@ -39,13 +41,23 @@ const removeTagsFromNode = (node: ts.Node, parentTags: string[], includeTags: st
   if (ts.isCallExpression(node)) {
     const firstArg = node.arguments[0];
     if (ts.isArrayLiteralExpression(firstArg)) {
-      const nodeTags = firstArg.elements.map((element: any) => element.text);
+      const nodeTags = firstArg.elements.map((element) => {
+        if (ts.isStringLiteral(element)) {
+          return element.text;
+        } else if (ts.isPropertyAccessExpression(element)) {
+          // Return enum's string value, eg. Tag.WIP => "WIP"
+          return element.name.escapedText as string;
+        }
+        return '';
+      }).filter((tag) => tag !== '');
+
       const uniqueTags = [...new Set([...nodeTags, ...parentTags])];
       const skipChildren = calculateSkipChildren(includeTags, excludeTags, uniqueTags);
 
       // Create a new node removing the tag list as the first argument
       const newArgs: ts.NodeArray<ts.Expression> = factory.createNodeArray([...node.arguments.slice(1)]);
       const newExpression = factory.createCallExpression(node.expression, undefined, newArgs);
+
       return {
         node: newExpression,
         tags: uniqueTags,
@@ -60,8 +72,8 @@ const removeTagsFromNode = (node: ts.Node, parentTags: string[], includeTags: st
   };
 }
 
-const transformer = <T extends ts.Node>(context: ts.TransformationContext) => (rootNode: T) => {
-  const { includeTags, excludeTags } = extractTags();
+const transformer = (config: Cypress.PluginConfigOptions) => <T extends ts.Node>(context: ts.TransformationContext) => (rootNode: T) => {
+  const { includeTags, excludeTags } = extractTags(config);
 
   const visit = (node: ts.Node, parentTags?: string[]): ts.Node | undefined => {
     let tags: string[] = parentTags ?? [];
@@ -117,19 +129,19 @@ const transformer = <T extends ts.Node>(context: ts.TransformationContext) => (r
   return ts.visitNode(rootNode, visit);
 };
 
-const processFile = (fileName: string, source: string) => {
+const processFile = (fileName: string, source: string, config: Cypress.PluginConfigOptions) => {
   const printer = ts.createPrinter();
 
   const sourceFile = ts.createSourceFile(fileName, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
 
-  const transformedResult = ts.transform<ts.SourceFile>(sourceFile, [transformer]);
+  const transformedResult = ts.transform<ts.SourceFile>(sourceFile, [transformer(config)]);
   const transformedSourceFile: ts.SourceFile = transformedResult.transformed[0];
   const result = printer.printFile(transformedSourceFile);
 
   return result;
 };
 
-const transform = (fileName: string) => {
+const transform = (fileName: string, config: Cypress.PluginConfigOptions) => {
   let data = '';
 
   function ondata (d: through.ThroughStream) {
@@ -137,14 +149,14 @@ const transform = (fileName: string) => {
   }
 
   function onend (this: through.ThroughStream) {
-    this.queue(processFile(fileName, data));
+    this.queue(processFile(fileName, data, config));
     this.emit('end');
   }
 
   return through(ondata, onend);
 };
 
-const preprocessor = () => {
+const preprocessor = (config: Cypress.PluginConfigOptions) => {
   const options = {
     ...browserify.defaultOptions,
     typescript: require.resolve('typescript'),
@@ -153,7 +165,7 @@ const preprocessor = () => {
       extensions: ['.ts'],
       transform: [
         ...browserify.defaultOptions.browserifyOptions.transform,
-        (fileName: string) => transform(fileName),
+        (fileName: string) => transform(fileName, config),
       ],
     },
   };

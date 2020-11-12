@@ -1,50 +1,64 @@
-const through = require('through');
-const browserify = require('browserify');
-const expect = require('chai').expect;
+/// <reference types="cypress" />
+
+import 'mocha';
+
+import browserify from 'browserify';
+import { expect } from 'chai';
+import through from 'through';
+
+// @ts-ignore
 const transform = require('../dist').transform;
 
-const tagify = () => {
-  return new Promise((resolve) => {
-    const options = {
-      ...browserify.defaultOptions,
-      typescript: require.resolve('typescript'),
-    };
+describe('Enum tags', function() {
+  let output: string[] = [];
+  let config = {
+    env: {
+      CYPRESS_INCLUDE_TAGS: undefined,
+      CYPRESS_EXCLUDE_TAGS: undefined,
+    },
+  } as unknown as Cypress.PluginConfigOptions;
 
-    try {
-      browserify(options)
-        .transform(transform)
-        .add(__dirname + '/../example/sample.ts')
-        .bundle()
-        .pipe(through(ondata, onend));
+  const tagify = (config: Cypress.PluginConfigOptions): Promise<string[]> => {
+    return new Promise((resolve, reject) => {
+      const options = {
+        typescript: require.resolve('typescript'),
+        extensions: ['.js', '.ts'],
+        plugin: [
+          ['tsify']
+        ],
+      };
 
-      let data = ''
-      function ondata(d) { data += d }
-      function onend() {
-        const lines = data.split('\n')
-        const startline = lines.indexOf('// sample start') + 1;
-        const endline = lines.indexOf('// sample end');
+      try {
+        browserify(options)
+          .transform((fileName: string) => transform(fileName, config))
+          .add(__dirname + '/../example/enum.ts')
+          .bundle()
+          .pipe(through(ondata, onend));
 
-        output = lines.slice(startline, endline);
-        resolve(output);
+        let data = ''
+        function ondata(d: string) { data += d }
+        function onend() {
+          const lines = data.split('\n')
+          const startline = lines.indexOf('// sample start') + 1;
+          const endline = lines.length - 3;
+
+          output = lines.slice(startline, endline);
+          resolve(output);
+        }
+      } catch (err) {
+        reject(err);
       }
-    } catch (err) {
-      console.log('I have an error');
-      reject(output);
-    }
-  });
-};
-
-describe('Tagify', function() {
-  let output = '';
+    });
+  };
 
   beforeEach(() => {
-    delete process.env.CYPRESS_INCLUDE_TAGS;
-    delete process.env.CYPRESS_EXCLUDE_TAGS;
+    delete config.env.CYPRESS_INCLUDE_TAGS;
+    delete config.env.CYPRESS_EXCLUDE_TAGS;
   });
 
   describe('No tags provided', () => {
     before(async () => {
-      output = await tagify();
+      output = await tagify(config);
     });
 
     it('should output all tests without tags', function() {
@@ -72,8 +86,8 @@ describe('Tagify', function() {
 
   describe('Include tags provided', () => {
     before(async () => {
-      process.env.CYPRESS_INCLUDE_TAGS='wip';
-      output = await tagify();
+      config.env.CYPRESS_INCLUDE_TAGS='WIP';
+      output = await tagify(config);
     });
 
     it('should output all tests without tags', function() {
@@ -101,8 +115,8 @@ describe('Tagify', function() {
 
   describe('Exclude tags provided', () => {
     before(async () => {
-      process.env.CYPRESS_EXCLUDE_TAGS='wip';
-      output = await tagify();
+      config.env.CYPRESS_EXCLUDE_TAGS='WIP';
+      output = await tagify(config);
     });
 
     it('should output all tests without tags', function() {
@@ -125,9 +139,9 @@ describe('Tagify', function() {
 
   describe('Include and exclude tags provided', () => {
     before(async () => {
-      process.env.CYPRESS_INCLUDE_TAGS='smoke,regression';
-      process.env.CYPRESS_EXCLUDE_TAGS='wip';
-      output = await tagify();
+      config.env.CYPRESS_INCLUDE_TAGS='SMOKE,REGRESSION';
+      config.env.CYPRESS_EXCLUDE_TAGS='WIP';
+      output = await tagify(config);
     });
 
     it('should output all tests without tags', function() {
