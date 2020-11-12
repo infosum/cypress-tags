@@ -88,3 +88,22 @@ For example:
 ```bash
 CYPRESS_INCLUDE_TAGS=WIP npx cypress run
 ```
+
+## Manipulating environment variables
+
+If you want to manipulate your environment variables before passing them into the preprocessor, you can set the new env vars to use on `config.env.CYPRESS_INCLUDE_TAGS` and `config.env.CYPRESS_EXCLUDE_TAGS`.
+
+```ts
+// cypress/plugins/index.js
+const tagify = require('cypress-tags');
+
+/**
+ * @type {Cypress.PluginConfig}
+ */
+module.exports = (on, config) => {
+  config.env.CYPRESS_INCLUDE_TAGS = 'custom,include,tags';
+  config.env.CYPRESS_EXCLUDE_TAGS = 'wip';
+
+  on('file:preprocessor', tagify(config));
+};
+```

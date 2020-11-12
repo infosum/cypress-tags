@@ -15,8 +15,10 @@ const isContext = isTestBlock('context');
 const isIt = isTestBlock('it');
 
 const extractTags = (config: Cypress.PluginConfigOptions) => {
-  const includeTags = config.env.CYPRESS_INCLUDE_TAGS ? config.env.CYPRESS_INCLUDE_TAGS.split(',') : [];
-  const excludeTags = config.env.CYPRESS_EXCLUDE_TAGS ? config.env.CYPRESS_EXCLUDE_TAGS.split(',') : [];
+  const includeEnvVar = config.env.CYPRESS_INCLUDE_TAGS ?? process.env.CYPRESS_INCLUDE_TAGS;
+  const excludeEnvVar = config.env.CYPRESS_EXCLUDE_TAGS ?? process.env.CYPRESS_EXCLUDE_TAGS;
+  const includeTags = includeEnvVar ? includeEnvVar.split(',') : [];
+  const excludeTags = excludeEnvVar ? excludeEnvVar.split(',') : [];
 
   return {
     includeTags,
