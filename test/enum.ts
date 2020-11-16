@@ -31,7 +31,7 @@ describe('Enum tags', function() {
       try {
         browserify(options)
           .transform((fileName: string) => transform(fileName, config))
-          .add(__dirname + '/../example/enum.ts')
+          .add(__dirname + '/../cypress/integration/enum.spec.ts')
           .bundle()
           .pipe(through(ondata, onend));
 
