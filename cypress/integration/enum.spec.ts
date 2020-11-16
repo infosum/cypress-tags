@@ -1,5 +1,3 @@
-/// <reference types='../' />
-
 export enum Tag {
   'WIP' = 0,
   'REGRESSION' = 1,

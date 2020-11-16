@@ -14,36 +14,36 @@ declare module '@cypress/browserify-preprocessor';
 // Add tags to mocha definitions
 declare namespace Mocha {
   interface TestFunction {
-    (tags: string[] | number[], title: string, fn?: Func): Test;
-    (tags: string[] | number[], title: string, fn?: AsyncFunc): Test;
-    (tags: string[] | number[], title: string, config: Cypress.TestConfigOverrides, fn?: Func): Test
-    (tags: string[] | number[], title: string, config: Cypress.TestConfigOverrides, fn?: AsyncFunc): Test
+    (tags: string | string[] | number[], title: string, fn?: Func): Test;
+    (tags: string | string[] | number[], title: string, fn?: AsyncFunc): Test;
+    (tags: string | string[] | number[], title: string, config: Cypress.TestConfigOverrides, fn?: Func): Test
+    (tags: string | string[] | number[], title: string, config: Cypress.TestConfigOverrides, fn?: AsyncFunc): Test
   }
   interface ExclusiveTestFunction {
-    (tags: string[] | number[], title: string, fn?: Func): Test;
-    (tags: string[] | number[], title: string, fn?: AsyncFunc): Test;
-    (tags: string[] | number[], title: string, config: Cypress.TestConfigOverrides, fn?: Func): Test
-    (tags: string[] | number[], title: string, config: Cypress.TestConfigOverrides, fn?: AsyncFunc): Test
+    (tags: string | string[] | number[], title: string, fn?: Func): Test;
+    (tags: string | string[] | number[], title: string, fn?: AsyncFunc): Test;
+    (tags: string | string[] | number[], title: string, config: Cypress.TestConfigOverrides, fn?: Func): Test
+    (tags: string | string[] | number[], title: string, config: Cypress.TestConfigOverrides, fn?: AsyncFunc): Test
   }
   interface PendingTestFunction {
-    (tags: string[] | number[], title: string, fn?: Func): Test;
-    (tags: string[] | number[], title: string, fn?: AsyncFunc): Test;
-    (tags: string[] | number[], title: string, config: Cypress.TestConfigOverrides, fn?: Func): Test
-    (tags: string[] | number[], title: string, config: Cypress.TestConfigOverrides, fn?: AsyncFunc): Test
+    (tags: string | string[] | number[], title: string, fn?: Func): Test;
+    (tags: string | string[] | number[], title: string, fn?: AsyncFunc): Test;
+    (tags: string | string[] | number[], title: string, config: Cypress.TestConfigOverrides, fn?: Func): Test
+    (tags: string | string[] | number[], title: string, config: Cypress.TestConfigOverrides, fn?: AsyncFunc): Test
   }
 
   interface SuiteFunction {
-    (tags: string[] | number[], title: string, fn: (this: Suite) => void): Suite;
-    (tags: string[] | number[], title: string, config: Cypress.TestConfigOverrides, fn: (this: Suite) => void): Suite
+    (tags: string | string[] | number[], title: string, fn: (this: Suite) => void): Suite;
+    (tags: string | string[] | number[], title: string, config: Cypress.TestConfigOverrides, fn: (this: Suite) => void): Suite
   }
 
   interface ExclusiveSuiteFunction {
-    (tags: string[] | number[], title: string, fn: (this: Suite) => void): Suite;
-    (tags: string[] | number[], title: string, config: Cypress.TestConfigOverrides, fn: (this: Suite) => void): Suite
+    (tags: string | string[] | number[], title: string, fn: (this: Suite) => void): Suite;
+    (tags: string | string[] | number[], title: string, config: Cypress.TestConfigOverrides, fn: (this: Suite) => void): Suite
   }
 
   interface PendingSuiteFunction {
-    (tags: string[] | number[], title: string, fn: (this: Suite) => void): Suite;
-    (tags: string[] | number[], title: string, config: Cypress.TestConfigOverrides, fn: (this: Suite) => void): Suite | void
+    (tags: string | string[] | number[], title: string, fn: (this: Suite) => void): Suite;
+    (tags: string | string[] | number[], title: string, config: Cypress.TestConfigOverrides, fn: (this: Suite) => void): Suite | void
   }
 }

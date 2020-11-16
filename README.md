@@ -107,3 +107,15 @@ module.exports = (on, config) => {
   on('file:preprocessor', tagify(config));
 };
 ```
+
+## Gotchas
+
+As the file preprocessor runs before the Typescript file has been evaluated, you cannot programatically generate your tag names.
+
+This means that in an example test as shown below:
+
+```
+  it([generateTagName()], 'I will also become a wip test', () => {});
+```
+
+The `generateTagName()` function will not resolve before the tests are filtered out. The typescript code itself will be passed into the Typescript Compiler API and the generated AST will be different to what is expected by the plugin.

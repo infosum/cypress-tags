@@ -9,7 +9,7 @@ import through from 'through';
 // @ts-ignore
 const transform = require('../dist').transform;
 
-describe('String tags', function() {
+describe('Single string tags', function() {
   let output: string[] = [];
   let config = {
     env: {
@@ -31,7 +31,7 @@ describe('String tags', function() {
       try {
         browserify(options)
           .transform((fileName: string) => transform(fileName, config))
-          .add(__dirname + '/../cypress/integration/string.spec.ts')
+          .add(__dirname + '/../cypress/integration/single_string.spec.ts')
           .bundle()
           .pipe(through(ondata, onend));
 
@@ -75,10 +75,8 @@ describe('String tags', function() {
         "});",
         "describe('Run tests with tagged it statements', () => {",
         "    it('I am a wip test', () => { });",
-        "    it('I am a smoke & regression test', () => { });",
         "    it('I am a regression test', () => { });",
         "    it('I am a smoke test', () => { });",
-        "    it('I am a wip smoke test', () => { });",
         "    it.skip('I have tags and should always be skipped', () => { });",
         "});",
       ]);
@@ -106,8 +104,6 @@ describe('String tags', function() {
         "    it('I am a wip test', () => { });",
         "    ;",
         "    ;",
-        "    ;",
-        "    it('I am a wip smoke test', () => { });",
         "    it.skip('I have tags and should always be skipped', () => { });",
         "});",
       ]);
@@ -128,10 +124,8 @@ describe('String tags', function() {
         ";",
         "describe('Run tests with tagged it statements', () => {",
         "    ;",
-        "    it('I am a smoke & regression test', () => { });",
         "    it('I am a regression test', () => { });",
         "    it('I am a smoke test', () => { });",
-        "    ;",
         "    ;",
         "});",
       ]);
@@ -153,10 +147,8 @@ describe('String tags', function() {
         ";",
         "describe('Run tests with tagged it statements', () => {",
         "    ;",
-        "    it('I am a smoke & regression test', () => { });",
         "    it('I am a regression test', () => { });",
         "    it('I am a smoke test', () => { });",
-        "    ;",
         "    ;",
         "});",
       ]);

@@ -39,3 +39,7 @@ dist/**/*
 
 # ignore yarn.lock
 yarn.lock
+
+# Cypress
+cypress/videos
+cypress/screenshots
