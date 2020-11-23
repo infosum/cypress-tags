@@ -102,7 +102,7 @@ const transformer = (config: Cypress.PluginConfigOptions) => <T extends ts.Node>
       const firstArg = node.arguments[0];
       const secondArg = node.arguments[1];
 
-      const firstArgIsTag = ts.isStringLiteral(firstArg) && ts.isStringLiteral(secondArg);
+      const firstArgIsTag = firstArg && ts.isStringLiteral(firstArg) && secondArg && ts.isStringLiteral(secondArg);
 
       if (ts.isIdentifier(node.expression)) {
         if (isDescribe(node) || isContext(node)) {
