@@ -177,6 +177,10 @@ const transform = (fileName: string, config: Cypress.PluginConfigOptions) => {
     this.emit('end');
   }
 
+  if (/\.json$/.test(fileName)) {
+    return through();
+  }
+
   return through(ondata, onend);
 };
 
