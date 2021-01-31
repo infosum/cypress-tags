@@ -10,9 +10,20 @@ const isTestBlock = (name: string) => (node: ts.CallExpression | ts.PropertyAcce
     node.expression.escapedText === name;
 };
 
+const isPropertyAccessExpression = (name: string) => (node: ts.PropertyAccessExpression) => {
+  return node.name.escapedText === name;
+};
+
+const isTitle = (node: ts.Expression) => {
+  return node && (ts.isStringLiteral(node) || ts.isTemplateExpression(node));
+};
+
 const isDescribe = isTestBlock('describe');
 const isContext = isTestBlock('context');
 const isIt = isTestBlock('it');
+
+const isOnly = isPropertyAccessExpression('only');
+const isSkip = isPropertyAccessExpression('skip');
 
 // Convert tags from comma delimitered environment variables to string arrays
 const extractTags = (config: Cypress.PluginConfigOptions) => {
@@ -102,7 +113,7 @@ const transformer = (config: Cypress.PluginConfigOptions) => <T extends ts.Node>
       const firstArg = node.arguments[0];
       const secondArg = node.arguments[1];
 
-      const firstArgIsTag = firstArg && ts.isStringLiteral(firstArg) && secondArg && ts.isStringLiteral(secondArg);
+      const firstArgIsTag = firstArg && ts.isStringLiteral(firstArg) && isTitle(secondArg);
 
       if (ts.isIdentifier(node.expression)) {
         if (isDescribe(node) || isContext(node)) {
@@ -121,20 +132,23 @@ const transformer = (config: Cypress.PluginConfigOptions) => <T extends ts.Node>
             const result = removeTagsFromNode(node, tags, includeTags, excludeTags);
             skipNode = result.skipNode;
             returnNode = result.node;
-          } else if (ts.isStringLiteral(firstArg)) {
+          } else if (isTitle(firstArg)) {
             // First arg is title
             skipNode = calculateSkipChildren(includeTags, excludeTags, tags);
           }
         }
       } else if (ts.isPropertyAccessExpression(node.expression)) {
-        // Node contains a .skip or .only
-        if (isIt(node.expression)) {
-          // It block
-          if (firstArgIsTag || ts.isArrayLiteralExpression(firstArg)) {
-            // First arg is single tag or tags list
-            const result = removeTagsFromNode(node, tags, includeTags, excludeTags);
-            skipNode = result.skipNode;
-            returnNode = result.node;
+        // Extra check in case property access expression is from a forEach or similar
+        if (isSkip(node.expression) || isOnly(node.expression)) {
+          // Node contains a .skip or .only
+          if (isIt(node.expression)) {
+            // It block
+            if (firstArgIsTag || ts.isArrayLiteralExpression(firstArg)) {
+              // First arg is single tag or tags list
+              const result = removeTagsFromNode(node, tags, includeTags, excludeTags);
+              skipNode = result.skipNode;
+              returnNode = result.node;
+            }
           }
         }
       }
@@ -168,11 +182,11 @@ const processFile = (fileName: string, source: string, config: Cypress.PluginCon
 const transform = (fileName: string, config: Cypress.PluginConfigOptions) => {
   let data = '';
 
-  function ondata (d: through.ThroughStream) {
+  function ondata(d: through.ThroughStream) {
     data += d;
   }
 
-  function onend (this: through.ThroughStream) {
+  function onend(this: through.ThroughStream) {
     this.queue(processFile(fileName, data, config));
     this.emit('end');
   }
