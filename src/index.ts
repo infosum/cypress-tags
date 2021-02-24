@@ -15,7 +15,7 @@ const isPropertyAccessExpression = (name: string) => (node: ts.PropertyAccessExp
 };
 
 const isTitle = (node: ts.Expression) => {
-  return node && (ts.isStringLiteral(node) || ts.isTemplateExpression(node));
+  return node && (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node) || ts.isTemplateExpression(node));
 };
 
 const isDescribe = isTestBlock('describe');

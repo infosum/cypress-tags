@@ -66,6 +66,7 @@ describe('Template expressions', function () {
       expect(output).to.deep.equal([
         "const foo = 'bar';",
         "describe(`Run tests with no tags ${foo}`, () => {",
+        "    it(`I am a regular test`, () => { });",
         "    it(`I am a regular test ${foo}`, () => { });",
         "    it(`I am a smoke test ${foo}`, () => { });",
         "    it(`I am a wip test ${foo}`, () => { });",
@@ -91,6 +92,7 @@ describe('Template expressions', function () {
         "describe(`Run tests with no tags ${foo}`, () => {",
         "    ;",
         "    ;",
+        "    ;",
         "    it(`I am a wip test ${foo}`, () => { });",
         "});",
         "describe(`Run tests with wip tag ${foo}`, () => {",
@@ -112,6 +114,7 @@ describe('Template expressions', function () {
       expect(output).to.deep.equal([
         "const foo = 'bar';",
         "describe(`Run tests with no tags ${foo}`, () => {",
+        "    it(`I am a regular test`, () => { });",
         "    it(`I am a regular test ${foo}`, () => { });",
         "    it(`I am a smoke test ${foo}`, () => { });",
         "    ;",
@@ -132,6 +135,7 @@ describe('Template expressions', function () {
       expect(output).to.deep.equal([
         "const foo = 'bar';",
         "describe(`Run tests with no tags ${foo}`, () => {",
+        "    ;",
         "    ;",
         "    it(`I am a smoke test ${foo}`, () => { });",
         "    ;",

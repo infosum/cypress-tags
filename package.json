@@ -1,6 +1,6 @@
 {
   "name": "cypress-tags",
-  "version": "0.0.19",
+  "version": "0.0.20",
   "description": "Use custom tags to slice up Cypress test runs.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -26,20 +26,20 @@
   },
   "dependencies": {
     "@cypress/browserify-preprocessor": "^3.0.1",
-    "cypress": "^6.1.0",
+    "cypress": "^6.5.0",
     "through": "^2.3.8"
   },
   "devDependencies": {
     "@types/browserify": "^12.0.36",
-    "@types/chai": "^4.2.14",
-    "@types/mocha": "^8.0.4",
-    "@types/node": "^14.14.7",
+    "@types/chai": "^4.2.15",
+    "@types/mocha": "^8.2.1",
+    "@types/node": "^14.14.31",
     "@types/through": "0.0.30",
-    "chai": "^4.2.0",
-    "mocha": "^8.2.1",
-    "ts-node": "^9.0.0",
+    "chai": "^4.3.0",
+    "mocha": "^8.3.0",
+    "ts-node": "^9.1.1",
     "tsify": "^5.0.2",
-    "typescript": "^4.0.5"
+    "typescript": "^4.2.2"
   },
   "keywords": [
     "cypress",
