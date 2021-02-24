@@ -11,3 +11,4 @@ All notable changes to this project will be documented in this file.
 ### Changed
 
 - Fixed bug [#16](https://github.com/annaet/cypress-tags/issues/16) where template literal in title property has no embedded expression was causing test to always be run.
+- Updated Cypress to v6.5.0 and other dependancies to latest.
