@@ -4,6 +4,8 @@ Use custom tags to slice up Cypress test runs.
 
 See [cypress-tags-example](https://github.com/annaet/cypress-tags-example) for a working example.
 
+This plugin uses TypeScript to parse the tests, so you will need `typescript` installed in your project.
+
 ## Install
 
 `npm install cypress-tags`
