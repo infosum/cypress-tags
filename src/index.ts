@@ -148,6 +148,9 @@ const transformer = (config: Cypress.PluginConfigOptions) => <T extends ts.Node>
               const result = removeTagsFromNode(node, tags, includeTags, excludeTags);
               skipNode = result.skipNode;
               returnNode = result.node;
+            } else {
+              // First arg is title
+              skipNode = calculateSkipChildren(includeTags, excludeTags, tags);
             }
           }
         }
