@@ -7,11 +7,11 @@ describe('Unskipped describe', () => {
   it('smoke', 'Tagged test', () => { });
 });
 
-describe.skip('Skipped describe', () => {
+describe.skip('smoke', 'Skipped describe', () => {
   it.skip('Skipped test', () => { });
-  it.skip('smoke', 'Skipped test', () => { });
+  it.skip('wip', 'Skipped test', () => { });
 
   it('Unskipped test', () => { });
-  it('smoke', 'Tagged test', () => { });
+  it('wip', 'Tagged test', () => { });
 });
 // sample end

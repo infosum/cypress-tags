@@ -9,7 +9,7 @@ import through from 'through';
 // @ts-ignore
 const transform = require('../dist').transform;
 
-describe('Skipped tests', function () {
+describe('Only tests', function () {
   let output: string[] = [];
   let config = {
     env: {
@@ -31,7 +31,7 @@ describe('Skipped tests', function () {
       try {
         browserify(options)
           .transform((fileName: string) => transform(fileName, config))
-          .add(__dirname + '/../cypress/integration/skip.spec.ts')
+          .add(__dirname + '/../cypress/integration/only.spec.ts')
           .bundle()
           .pipe(through(ondata, onend));
 
@@ -64,17 +64,17 @@ describe('Skipped tests', function () {
 
     it('should output all tests without tags', function () {
       expect(output).to.deep.equal([
-        "describe('Unskipped describe', () => {",
-        "    it.skip('Skipped test', () => { });",
-        "    it.skip('Skipped test', () => { });",
-        "    it('Unskipped test', () => { });",
-        "    it('Tagged test', () => { });",
+        "describe('Describe block', () => {",
+        "    it.only('Run this test without tag', () => { });",
+        "    it.only('Run this test with tag', () => { });",
+        "    it('Skip this test without tag', () => { });",
+        "    it('Skip this test without tag', () => { });",
         "});",
-        "describe.skip('Skipped describe', () => {",
-        "    it.skip('Skipped test', () => { });",
-        "    it.skip('Skipped test', () => { });",
-        "    it('Unskipped test', () => { });",
-        "    it('Tagged test', () => { });",
+        "describe.only('Only run this describe', () => {",
+        "    it.only('Run this test without tag', () => { });",
+        "    it.only('Run this test with tag', () => { });",
+        "    it('Skip this test without tag', () => { });",
+        "    it('Skip this test without tag', () => { });",
         "});",
       ]);
     });
@@ -88,17 +88,17 @@ describe('Skipped tests', function () {
 
     it('should output all tests without tags', function () {
       expect(output).to.deep.equal([
-        "describe('Unskipped describe', () => {",
+        "describe('Describe block', () => {",
         "    ;",
-        "    it.skip('Skipped test', () => { });",
+        "    it.only('Run this test with tag', () => { });",
         "    ;",
-        "    it('Tagged test', () => { });",
+        "    it('Skip this test without tag', () => { });",
         "});",
-        "describe.skip('Skipped describe', () => {",
-        "    it.skip('Skipped test', () => { });",
-        "    it.skip('Skipped test', () => { });",
-        "    it('Unskipped test', () => { });",
-        "    it('Tagged test', () => { });",
+        "describe.only('Only run this describe', () => {",
+        "    it.only('Run this test without tag', () => { });",
+        "    it.only('Run this test with tag', () => { });",
+        "    it('Skip this test without tag', () => { });",
+        "    it('Skip this test without tag', () => { });",
         "});",
       ]);
     });
@@ -112,10 +112,10 @@ describe('Skipped tests', function () {
 
     it('should output all tests without tags', function () {
       expect(output).to.deep.equal([
-        "describe('Unskipped describe', () => {",
-        "    it.skip('Skipped test', () => { });",
+        "describe('Describe block', () => {",
+        "    it.only('Run this test without tag', () => { });",
         "    ;",
-        "    it('Unskipped test', () => { });",
+        "    it('Skip this test without tag', () => { });",
         "    ;",
         "});",
         ";",
@@ -132,16 +132,16 @@ describe('Skipped tests', function () {
 
     it('should output all tests without tags', function () {
       expect(output).to.deep.equal([
-        "describe('Unskipped describe', () => {",
+        "describe('Describe block', () => {",
         "    ;",
-        "    it.skip('Skipped test', () => { });",
+        "    it.only('Run this test with tag', () => { });",
         "    ;",
-        "    it('Tagged test', () => { });",
+        "    it('Skip this test without tag', () => { });",
         "});",
-        "describe.skip('Skipped describe', () => {",
-        "    it.skip('Skipped test', () => { });",
+        "describe.only('Only run this describe', () => {",
+        "    it.only('Run this test without tag', () => { });",
         "    ;",
-        "    it('Unskipped test', () => { });",
+        "    it('Skip this test without tag', () => { });",
         "    ;",
         "});",
       ]);

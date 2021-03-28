@@ -141,7 +141,16 @@ const transformer = (config: Cypress.PluginConfigOptions) => <T extends ts.Node>
         // Extra check in case property access expression is from a forEach or similar
         if (isSkip(node.expression) || isOnly(node.expression)) {
           // Node contains a .skip or .only
-          if (isIt(node.expression)) {
+          if (isDescribe(node.expression) || isContext(node.expression)) {
+            // Describe / Context block
+            if (firstArgIsTag || ts.isArrayLiteralExpression(firstArg)) {
+              // First arg is single tag or tags list
+              const result = removeTagsFromNode(node, tags, includeTags, excludeTags);
+              skipNode = result.skipNode;
+              returnNode = result.node;
+              tags = result.tags;
+            }
+          } else if (isIt(node.expression)) {
             // It block
             if (firstArgIsTag || ts.isArrayLiteralExpression(firstArg)) {
               // First arg is single tag or tags list
