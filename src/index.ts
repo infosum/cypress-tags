@@ -115,8 +115,9 @@ const transformer = (config: Cypress.PluginConfigOptions) => <T extends ts.Node>
 
       const firstArgIsTag = firstArg && ts.isStringLiteral(firstArg) && isTitle(secondArg);
 
-      if (ts.isIdentifier(node.expression)) {
-        if (isDescribe(node) || isContext(node)) {
+      // Check block for tags and skip nodes as required
+      const checkBlockForTags = (nodeExpression: ts.CallExpression | ts.PropertyAccessExpression, node: ts.CallExpression) => {
+        if (isDescribe(nodeExpression) || isContext(nodeExpression)) {
           // Describe / Context block
           if (firstArgIsTag || ts.isArrayLiteralExpression(firstArg)) {
             // First arg is single tag or tags list
@@ -125,7 +126,7 @@ const transformer = (config: Cypress.PluginConfigOptions) => <T extends ts.Node>
             returnNode = result.node;
             tags = result.tags;
           }
-        } else if (isIt(node)) {
+        } else if (isIt(nodeExpression)) {
           // It block
           if (firstArgIsTag || ts.isArrayLiteralExpression(firstArg)) {
             // First arg is single tag or tags list
@@ -137,19 +138,15 @@ const transformer = (config: Cypress.PluginConfigOptions) => <T extends ts.Node>
             skipNode = calculateSkipChildren(includeTags, excludeTags, tags);
           }
         }
+      };
+
+      if (ts.isIdentifier(node.expression)) {
+        checkBlockForTags(node, node);
       } else if (ts.isPropertyAccessExpression(node.expression)) {
         // Extra check in case property access expression is from a forEach or similar
         if (isSkip(node.expression) || isOnly(node.expression)) {
           // Node contains a .skip or .only
-          if (isIt(node.expression)) {
-            // It block
-            if (firstArgIsTag || ts.isArrayLiteralExpression(firstArg)) {
-              // First arg is single tag or tags list
-              const result = removeTagsFromNode(node, tags, includeTags, excludeTags);
-              skipNode = result.skipNode;
-              returnNode = result.node;
-            }
-          }
+          checkBlockForTags(node.expression, node);
         }
       }
     }
