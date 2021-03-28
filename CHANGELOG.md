@@ -15,6 +15,7 @@ All notable changes to this project will be documented in this file.
 - Fixes bug [#19](https://github.com/annaet/cypress-tags/issues/19) where tests including a `.only` were not being evaluated for tags.
 - Refactor common helper code out of test files and into `helpers/tagify`.
 - Refactor common code for evaluating whether code block has tags into `checkBlockForTags` function.
+- Updated Cypress to v6.8.0 and other dependancies to latest.
 
 
 ## [0.0.20] - 2021-02-24
