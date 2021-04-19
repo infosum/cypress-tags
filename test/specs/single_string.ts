@@ -44,7 +44,7 @@ describe('Single string tags', function () {
     });
   });
 
-  describe('Include tags provided', () => {
+  describe('Describe block include tags provided', () => {
     before(async () => {
       config.env.CYPRESS_INCLUDE_TAGS = 'wip';
       output = await tagify(config, 'single_string');
@@ -66,6 +66,33 @@ describe('Single string tags', function () {
         "    ;",
         "    ;",
         "    it.skip('I have tags and should always be skipped', () => { });",
+        "});",
+      ]);
+    });
+  });
+
+  describe('It block include tags provided', () => {
+    before(async () => {
+      config.env.CYPRESS_INCLUDE_TAGS = 'feature';
+      output = await tagify(config, 'single_string');
+    });
+
+    it('should output all tests without tags', function () {
+      expect(output).to.deep.equal([
+        "describe('Run tests with no tags', () => {",
+        "    ;",
+        "});",
+        "describe('Run tests with tagged describe block', () => {",
+        "    ;",
+        "    it('I will also become a wip test', () => { });",
+        "    ;",
+        "    ;",
+        "});",
+        "describe('Run tests with tagged it statements', () => {",
+        "    ;",
+        "    ;",
+        "    ;",
+        "    ;",
         "});",
       ]);
     });

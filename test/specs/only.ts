@@ -41,7 +41,7 @@ describe('Only tests', function () {
     });
   });
 
-  describe('Include tags provided', () => {
+  describe('Describe block include tags provided', () => {
     before(async () => {
       config.env.CYPRESS_INCLUDE_TAGS = 'smoke';
       output = await tagify(config, 'only');
@@ -59,6 +59,30 @@ describe('Only tests', function () {
         "    it.only('Run this test without tag', () => { });",
         "    it.only('Run this test with tag', () => { });",
         "    it('Skip this test without tag', () => { });",
+        "    it('Skip this test without tag', () => { });",
+        "});",
+      ]);
+    });
+  });
+
+  describe('It block include tags provided', () => {
+    before(async () => {
+      config.env.CYPRESS_INCLUDE_TAGS = 'wip';
+      output = await tagify(config, 'only');
+    });
+
+    it('should output all tests without tags', function () {
+      expect(output).to.deep.equal([
+        "describe('Describe block', () => {",
+        "    ;",
+        "    ;",
+        "    ;",
+        "    ;",
+        "});",
+        "describe.only('Only run this describe', () => {",
+        "    ;",
+        "    it.only('Run this test with tag', () => { });",
+        "    ;",
         "    it('Skip this test without tag', () => { });",
         "});",
       ]);

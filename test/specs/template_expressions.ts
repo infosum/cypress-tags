@@ -41,7 +41,7 @@ describe('Template expressions', function () {
     });
   });
 
-  describe('Include tags provided', () => {
+  describe('Describe block include tags provided', () => {
     before(async () => {
       config.env.CYPRESS_INCLUDE_TAGS = 'wip';
       output = await tagify(config, 'template_expressions');
@@ -60,6 +60,30 @@ describe('Template expressions', function () {
         "    it(`I am a regular test ${foo}`, () => { });",
         "    it(`I am a smoke test ${foo}`, () => { });",
         "    it(`I am a wip test ${foo}`, () => { });",
+        "});",
+      ]);
+    });
+  });
+
+  describe('It block include tags provided', () => {
+    before(async () => {
+      config.env.CYPRESS_INCLUDE_TAGS = 'smoke';
+      output = await tagify(config, 'template_expressions');
+    });
+
+    it('should output all tests without tags', function () {
+      expect(output).to.deep.equal([
+        "const foo = 'bar';",
+        "describe(`Run tests with no tags ${foo}`, () => {",
+        "    ;",
+        "    ;",
+        "    it(`I am a smoke test ${foo}`, () => { });",
+        "    ;",
+        "});",
+        "describe(`Run tests with wip tag ${foo}`, () => {",
+        "    ;",
+        "    it(`I am a smoke test ${foo}`, () => { });",
+        "    ;",
         "});",
       ]);
     });

@@ -39,15 +39,16 @@ const extractTags = (config: Cypress.PluginConfigOptions) => {
 };
 
 // Use include and exclude tags to determine if current node should be skipped
-const calculateSkipChildren = (includeTags: string[], excludeTags: string[], tags: string[]): boolean => {
-  const includeTest = includeTags.length === 0 || tags.some(tag => includeTags.includes(tag));
+const calculateSkipChildren = (includeTags: string[], excludeTags: string[], tags: string[], isDescribeNode?: boolean): boolean => {
+  // Don't perform include test on describe nodes, allow the result to fall through into inner nodes
+  const includeTest = isDescribeNode || includeTags.length === 0 || tags.some(tag => includeTags.includes(tag));
   const excludeTest = excludeTags.length > 0 && tags.some(tag => excludeTags.includes(tag));
 
   return !(includeTest && !excludeTest);
 }
 
 // Remove tag argument from node. Return new node, tags list, and whether or not to skip node
-const removeTagsFromNode = (node: ts.Node, parentTags: string[], includeTags: string[], excludeTags: string[]): {
+const removeTagsFromNode = (node: ts.Node, parentTags: string[], includeTags: string[], excludeTags: string[], isDescribeNode?: boolean): {
   node: ts.Node,
   tags: string[],
   skipNode: boolean,
@@ -86,7 +87,7 @@ const removeTagsFromNode = (node: ts.Node, parentTags: string[], includeTags: st
 
   // Create unique list of tags from current node and parents
   const uniqueTags = [...new Set([...nodeTags, ...parentTags])];
-  const skipNode = calculateSkipChildren(includeTags, excludeTags, uniqueTags);
+  const skipNode = calculateSkipChildren(includeTags, excludeTags, uniqueTags, isDescribeNode);
 
   // Create a new node removing the tag list as the first argument
   const newArgs: ts.NodeArray<ts.Expression> = factory.createNodeArray([...node.arguments.slice(1)]);
@@ -121,7 +122,7 @@ const transformer = (config: Cypress.PluginConfigOptions) => <T extends ts.Node>
           // Describe / Context block
           if (firstArgIsTag || ts.isArrayLiteralExpression(firstArg)) {
             // First arg is single tag or tags list
-            const result = removeTagsFromNode(node, tags, includeTags, excludeTags);
+            const result = removeTagsFromNode(node, tags, includeTags, excludeTags, true);
             skipNode = result.skipNode;
             returnNode = result.node;
             tags = result.tags;

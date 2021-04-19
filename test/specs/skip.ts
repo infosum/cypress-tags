@@ -41,7 +41,7 @@ describe('Skipped tests', function () {
     });
   });
 
-  describe('Include tags provided', () => {
+  describe('Describe block include tags provided', () => {
     before(async () => {
       config.env.CYPRESS_INCLUDE_TAGS = 'smoke';
       output = await tagify(config, 'skip');
@@ -59,6 +59,30 @@ describe('Skipped tests', function () {
         "    it.skip('Skipped test', () => { });",
         "    it.skip('Skipped test', () => { });",
         "    it('Unskipped test', () => { });",
+        "    it('Tagged test', () => { });",
+        "});",
+      ]);
+    });
+  });
+
+  describe('It block include tags provided', () => {
+    before(async () => {
+      config.env.CYPRESS_INCLUDE_TAGS = 'wip';
+      output = await tagify(config, 'skip');
+    });
+
+    it('should output all tests without tags', function () {
+      expect(output).to.deep.equal([
+        "describe('Unskipped describe', () => {",
+        "    ;",
+        "    ;",
+        "    ;",
+        "    ;",
+        "});",
+        "describe.skip('Skipped describe', () => {",
+        "    ;",
+        "    it.skip('Skipped test', () => { });",
+        "    ;",
         "    it('Tagged test', () => { });",
         "});",
       ]);
