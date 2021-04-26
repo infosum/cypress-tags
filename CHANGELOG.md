@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 
 - Updated Cypress to v7.1.0 and other dependancies to latest.
 - Fixed bug [#25](https://github.com/annaet/cypress-tags/issues/25) where tagged describe blocks were being ignored completely when the `CYPRESS_INCLUDE_TAGS` env var included tags that did not match the describe block. Now `cypress-tags` should fall through to the inner test blocks and check those for tags instead.
+- Update README to explain why using Cypress's `--env` CLI argument does not work as referenced in [#35](https://github.com/annaet/cypress-tags/issues/35).
 
 
 ## [0.0.21] - 2021-03-28
