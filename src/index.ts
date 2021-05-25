@@ -19,8 +19,10 @@ const isTitle = (node: ts.Expression) => {
 };
 
 const isDescribe = isTestBlock('describe');
+const isXDescribe = isTestBlock('xdescribe');
 const isContext = isTestBlock('context');
 const isIt = isTestBlock('it');
+const isXIt = isTestBlock('xit');
 
 const isOnly = isPropertyAccessExpression('only');
 const isSkip = isPropertyAccessExpression('skip');
@@ -118,7 +120,7 @@ const transformer = (config: Cypress.PluginConfigOptions) => <T extends ts.Node>
 
       // Check block for tags and skip nodes as required
       const checkBlockForTags = (nodeExpression: ts.CallExpression | ts.PropertyAccessExpression, node: ts.CallExpression) => {
-        if (isDescribe(nodeExpression) || isContext(nodeExpression)) {
+        if (isDescribe(nodeExpression) || isContext(nodeExpression) || isXDescribe(nodeExpression)) {
           // Describe / Context block
           if (firstArgIsTag || ts.isArrayLiteralExpression(firstArg)) {
             // First arg is single tag or tags list
@@ -127,7 +129,7 @@ const transformer = (config: Cypress.PluginConfigOptions) => <T extends ts.Node>
             returnNode = result.node;
             tags = result.tags;
           }
-        } else if (isIt(nodeExpression)) {
+        } else if (isIt(nodeExpression) || isXIt(nodeExpression)) {
           // It block
           if (firstArgIsTag || ts.isArrayLiteralExpression(firstArg)) {
             // First arg is single tag or tags list
