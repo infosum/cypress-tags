@@ -69,6 +69,13 @@ If you wish to change this functionality you can use the `CYPRESS_INCLUDE_USE_BO
 
 These will only include or exclude a test if it matches **all** the tags passed in respectively.
 
+Set the environment variables to true to trigger this behaviour:
+
+```bash
+CYPRESS_INCLUDE_USE_BOOLEAN_AND=true CYPRESS_INCLUDE_TAGS=smoke,regression npx cypress run
+CYPRESS_EXCLUDE_USE_BOOLEAN_AND=true CYPRESS_EXCLUDE_TAGS=smoke,regression npx cypress run
+```
+
 ## Using enums as tags
 
 If you have tags defines on an enum you can use them in your tags list.
