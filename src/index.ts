@@ -40,17 +40,54 @@ const extractTags = (config: Cypress.PluginConfigOptions) => {
   };
 };
 
+interface EnvVars {
+  includeUseBooleanAnd: boolean;
+  excludeUseBooleanAnd: boolean;
+}
+
+// Convert tags from comma delimitered environment variables to string arrays
+const extractEnvVars = (config: Cypress.PluginConfigOptions): EnvVars => {
+  const includeUseBooleanAnd = config.env.CYPRESS_INCLUDE_USE_BOOLEAN_AND ?? process.env.CYPRESS_INCLUDE_USE_BOOLEAN_AND;
+  const excludeUseBooleanAnd = config.env.CYPRESS_EXCLUDE_USE_BOOLEAN_AND ?? process.env.CYPRESS_EXCLUDE_USE_BOOLEAN_AND;
+
+  return {
+    includeUseBooleanAnd,
+    excludeUseBooleanAnd,
+  };
+};
+
 // Use include and exclude tags to determine if current node should be skipped
-const calculateSkipChildren = (includeTags: string[], excludeTags: string[], tags: string[], isDescribeNode?: boolean): boolean => {
+const calculateSkipChildren = (
+  includeTags: string[],
+  excludeTags: string[],
+  tags: string[],
+  isDescribeNode: boolean,
+  envVars: EnvVars
+): boolean => {
   // Don't perform include test on describe nodes, allow the result to fall through into inner nodes
-  const includeTest = isDescribeNode || includeTags.length === 0 || tags.some(tag => includeTags.includes(tag));
-  const excludeTest = excludeTags.length > 0 && tags.some(tag => excludeTags.includes(tag));
+  const includeTest = isDescribeNode || includeTags.length === 0
+    || (envVars.includeUseBooleanAnd
+      ? includeTags.every(tag => tags.includes(tag))
+      : tags.some(tag => includeTags.includes(tag))
+    );
+  const excludeTest = excludeTags.length > 0
+    && (envVars.excludeUseBooleanAnd
+      ? excludeTags.every(tag => tags.includes(tag))
+      : tags.some(tag => excludeTags.includes(tag))
+    );
 
   return !(includeTest && !excludeTest);
 }
 
 // Remove tag argument from node. Return new node, tags list, and whether or not to skip node
-const removeTagsFromNode = (node: ts.Node, parentTags: string[], includeTags: string[], excludeTags: string[], isDescribeNode?: boolean): {
+const removeTagsFromNode = (
+  node: ts.Node,
+  parentTags: string[],
+  includeTags: string[],
+  excludeTags: string[],
+  isDescribeNode: boolean,
+  envVars: EnvVars
+): {
   node: ts.Node,
   tags: string[],
   skipNode: boolean,
@@ -89,7 +126,7 @@ const removeTagsFromNode = (node: ts.Node, parentTags: string[], includeTags: st
 
   // Create unique list of tags from current node and parents
   const uniqueTags = [...new Set([...nodeTags, ...parentTags])];
-  const skipNode = calculateSkipChildren(includeTags, excludeTags, uniqueTags, isDescribeNode);
+  const skipNode = calculateSkipChildren(includeTags, excludeTags, uniqueTags, isDescribeNode, envVars);
 
   // Create a new node removing the tag list as the first argument
   const newArgs: ts.NodeArray<ts.Expression> = factory.createNodeArray([...node.arguments.slice(1)]);
@@ -105,6 +142,7 @@ const removeTagsFromNode = (node: ts.Node, parentTags: string[], includeTags: st
 // Transform TypeScript AST to filter tests and remove tag arguments to make compatible with Cypress types
 const transformer = (config: Cypress.PluginConfigOptions) => <T extends ts.Node>(context: ts.TransformationContext) => (rootNode: T) => {
   const { includeTags, excludeTags } = extractTags(config);
+  const envVars = extractEnvVars(config);
 
   const visit = (node: ts.Node, parentTags?: string[]): ts.Node | undefined => {
     let tags: string[] = parentTags ?? [];
@@ -124,7 +162,7 @@ const transformer = (config: Cypress.PluginConfigOptions) => <T extends ts.Node>
           // Describe / Context block
           if (firstArgIsTag || ts.isArrayLiteralExpression(firstArg)) {
             // First arg is single tag or tags list
-            const result = removeTagsFromNode(node, tags, includeTags, excludeTags, true);
+            const result = removeTagsFromNode(node, tags, includeTags, excludeTags, true, envVars);
             skipNode = result.skipNode;
             returnNode = result.node;
             tags = result.tags;
@@ -133,12 +171,12 @@ const transformer = (config: Cypress.PluginConfigOptions) => <T extends ts.Node>
           // It block
           if (firstArgIsTag || ts.isArrayLiteralExpression(firstArg)) {
             // First arg is single tag or tags list
-            const result = removeTagsFromNode(node, tags, includeTags, excludeTags);
+            const result = removeTagsFromNode(node, tags, includeTags, excludeTags, false, envVars);
             skipNode = result.skipNode;
             returnNode = result.node;
           } else if (isTitle(firstArg)) {
             // First arg is title
-            skipNode = calculateSkipChildren(includeTags, excludeTags, tags);
+            skipNode = calculateSkipChildren(includeTags, excludeTags, tags, false, envVars);
           }
         }
       };
