@@ -2,15 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.1.0] - Upcoming
+## [0.1.0] - 2021-05-25
+
+### Added
+- Added new environment variables `CYPRESS_INCLUDE_USE_BOOLEAN_AND` and `CYPRESS_EXCLUDE_USE_BOOLEAN_AND` to allow a user to boolean AND tags together when including or excluding. Closes [#34](https://github.com/annaet/cypress-tags/issues/34).
+- Added support for `xit` and `xdescribe`. Closes [#47](https://github.com/annaet/cypress-tags/issues/47).
 
 ### Changed
 
-- Updated Cypress to v7.1.0 and other dependancies to latest.
+- Updated Cypress to v7.4.0 and other dependancies to latest.
 - Fixed bug [#25](https://github.com/annaet/cypress-tags/issues/25) where tagged describe blocks were being ignored completely when the `CYPRESS_INCLUDE_TAGS` env var included tags that did not match the describe block. Now `cypress-tags` should fall through to the inner test blocks and check those for tags instead.
-- Update README to explain why using Cypress's `--env` CLI argument does not work as referenced in [#35](https://github.com/annaet/cypress-tags/issues/35).
-- Fixed bug [#47](https://github.com/annaet/cypress-tags/issues/47) where `xit` and `xdescribe` being used were causing tests to fail.
-- Adds new environment variables to allow a user to boolean AND tags together when including or excluding as in [#34](https://github.com/annaet/cypress-tags/issues/34).
+- Updated README to explain why using Cypress's `--env` CLI argument does not work as referenced in [#35](https://github.com/annaet/cypress-tags/issues/35).
+
 
 ## [0.0.21] - 2021-03-28
 
