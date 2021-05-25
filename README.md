@@ -61,6 +61,14 @@ Combine the two for more complex testing strategies.
 CYPRESS_INCLUDE_TAGS=smoke,regression CYPRESS_EXCLUDE_TAGS=wip npx cypress run
 ```
 
+## Boolean AND your tags rather than OR
+
+By default `cypress-tags` will either include or exclude a test if any of the tags passed in match with a tagged test.
+
+If you wish to change this functionality you can use the `CYPRESS_INCLUDE_USE_BOOLEAN_AND` and `CYPRESS_EXCLUDE_USE_BOOLEAN_AND` environment variables.
+
+These will only include or exclude a test if it matches **all** the tags passed in respectively.
+
 ## Using enums as tags
 
 If you have tags defines on an enum you can use them in your tags list.
