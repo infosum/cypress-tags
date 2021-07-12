@@ -2,9 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+
+## [0.2.0] - 2021-07-12
+
+### Changed
+
+- Fixed bug [#58](https://github.com/annaet/cypress-tags/issues/58) where `createEmptyStatement` was incompatible with a newer version of TypeScript. Replaced with `createOmittedExpression`. Credit to @omjokine!
+- Updated dependencies.
+
+
 ## [0.1.0] - 2021-05-25
 
 ### Added
+
 - Added new environment variables `CYPRESS_INCLUDE_USE_BOOLEAN_AND` and `CYPRESS_EXCLUDE_USE_BOOLEAN_AND` to allow a user to boolean AND tags together when including or excluding. Closes [#34](https://github.com/annaet/cypress-tags/issues/34).
 - Added support for `xit` and `xdescribe`. Closes [#47](https://github.com/annaet/cypress-tags/issues/47).
 
