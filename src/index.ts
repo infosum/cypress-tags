@@ -194,7 +194,7 @@ const transformer = (config: Cypress.PluginConfigOptions) => <T extends ts.Node>
 
     if (skipNode) {
       // Replaces node with semi-colon, effectively skipping node and any children
-      returnNode = factory.createEmptyStatement();
+      returnNode = factory.createOmittedExpression();
     } else {
       returnNode = ts.visitEachChild(returnNode, (node) => visit(node, tags), context);
     }
