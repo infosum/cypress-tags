@@ -25,6 +25,9 @@ jobs:
         
       - name: Install Dependencies
         run: npm install
+
+      - name: Install Peer Dependencies
+        run: npm install cypress --no-save
         
       - name: Build
         run: npm run build
