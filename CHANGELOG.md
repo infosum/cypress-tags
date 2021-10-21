@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.0] - 2021-09-27
+
+### Changed
+
+- Fixed issue [#100](https://github.com/annaet/cypress-tags/issues/100) where `cypress` was not defined as a peer dependency. Credit to @TomaszG.
+- Updated dependencies.
+
 
 ## [0.2.0] - 2021-07-12
 
@@ -46,7 +53,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 
 - Added this CHANGELOG file.
-  
+
 ### Changed
 
 - Fixed bug [#16](https://github.com/annaet/cypress-tags/issues/16) where template literal in title property has no embedded expression was causing test to always be run.
