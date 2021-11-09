@@ -139,10 +139,14 @@ This means that in an example test as shown below:
 
 The `generateTagName()` function will not resolve before the tests are filtered out. The typescript code itself will be passed into the Typescript Compiler API and the generated AST will be different to what is expected by the plugin.
 
-### Passing in environtment variables
+### Passing in environment variables
 
 Environment variables need to be defined before running your tests, this can either be set inline or via an external file such as your `.bashrc`.
 
-Setting environment variables via Cypress's `--env` CLI argument will **not** work. As stated in the Cypress [documentation](https://docs.cypress.io/guides/guides/environment-variables#Setting):
+If you are a Windows user the example commands may not work for you. You may need to use the Windows [set](https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/set_1) command instead.
 
-> In Cypress, "environment variables" are variables that are accessible via Cypress.env. These are not the same as OS-level environment variables.
+For example:
+
+```
+set CYPRESS_INCLUDE_TAGS=smoke npx cypress run
+```
