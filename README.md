@@ -143,10 +143,16 @@ The `generateTagName()` function will not resolve before the tests are filtered 
 
 Environment variables need to be defined before running your tests, this can either be set inline or via an external file such as your `.bashrc`.
 
-If you are a Windows user the example commands may not work for you. You may need to use the Windows [set](https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/set_1) command instead.
+If you are a Windows user the example commands may not work for you (which assume you are executing cypress from the bash or git bash terminal, both of which accept you passing env variables before executing cypress. The windows terminal, CMD, or Powershell don't). You may need to use the Windows [set](https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/set_1) command instead, 
 
 For example:
 
 ```
 set CYPRESS_INCLUDE_TAGS=smoke npx cypress run
+```
+
+or an easier option, move the CYPRESS_INCLUDE_TAGS variable and put it after the --env option
+
+```
+npx cypress run --env CYPRESS_INCLUDE_TAGS=smoke
 ```
