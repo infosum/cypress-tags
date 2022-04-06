@@ -94,7 +94,7 @@ const calculateSkipChildren = (
   envVars: EnvVars
 ): boolean => {
   // Don't perform include test on describe nodes, allow the result to fall through into inner nodes
-  const includeTest = envVars.useIncludeExcludeExpressions ? calculateParsedTagSetMatch(parsedIncludeTagsSet, tags) : isDescribeNode || includeTags.length === 0
+  const includeTest = envVars.useIncludeExcludeExpressions ? isDescribeNode || calculateParsedTagSetMatch(parsedIncludeTagsSet, tags) : isDescribeNode || includeTags.length === 0
     || (envVars.includeUseBooleanAnd
       ? includeTags.every(tag => tags.includes(tag))
       : tags.some(tag => includeTags.includes(tag))
@@ -157,6 +157,7 @@ const removeTagsFromNode = (
 
   // Create unique list of tags from current node and parents
   const uniqueTags = [...new Set([...nodeTags, ...parentTags])];
+  console.log(uniqueTags)
   const skipNode = calculateSkipChildren(includeTags, excludeTags, parsedIncludeTagsSet, parsedExcludeTagsSet, uniqueTags, isDescribeNode, envVars);
 
   // Create a new node removing the tag list as the first argument
