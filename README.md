@@ -75,7 +75,35 @@ Set the environment variables to true to trigger this behaviour:
 CYPRESS_INCLUDE_USE_BOOLEAN_AND=true CYPRESS_INCLUDE_TAGS=smoke,regression npx cypress run
 CYPRESS_EXCLUDE_USE_BOOLEAN_AND=true CYPRESS_EXCLUDE_TAGS=smoke,regression npx cypress run
 ```
+## Boolean Expressions
 
+By default cypress-tags use comma separated tags for filtering tests as mentioned above. If you wish to use Boolean expressions in place of the default comma separated tags you can use the `CYPRESS_USE_INCLUDE_EXCLUDE_EXPRESSIONS` environment variable.
+
+Set the environment variables to true to trigger this behaviour.
+```bash
+CYPRESS_USE_INCLUDE_EXCLUDE_EXPRESSIONS=true
+```
+### Including Tests
+Select tests by passing a boolean expression of tags using **AND** and **OR** to the Cypress environment variable `CYPRESS_INCLUDE_EXPRESSION`.
+
+```bash
+CYPRESS_INCLUDE_EXPRESSION='(smoke AND regression) AND (feature1 OR feature2)' npx cypress run
+```
+For the above expression tests having `["smoke", "regression", "feature1"]` or `["smoke", "regression", "feature2"]` as tags will be filtered out.
+
+### Excluding Tests
+Skip tests by passing a boolean expression of tags to the Cypress environment variable `CYPRESS_EXCLUDE_EXPRESSION`.
+
+```bash
+CYPRESS_EXCLUDE_EXPRESSION='wip OR skip' npx cypress run
+```
+For the above expression all the tests with either wip or skip as tags are excluded.
+
+Combine the two for more complex testing strategies.
+
+```bash
+CYPRESS_INCLUDE_EXPRESSION='(smoke AND regression) AND (feature1 OR feature2)' CYPRESS_EXCLUDE_EXPRESSION='wip OR skip' npx cypress run
+```
 ## Using enums as tags
 
 If you have tags defines on an enum you can use them in your tags list.
