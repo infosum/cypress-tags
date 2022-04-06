@@ -157,7 +157,6 @@ const removeTagsFromNode = (
 
   // Create unique list of tags from current node and parents
   const uniqueTags = [...new Set([...nodeTags, ...parentTags])];
-  console.log(uniqueTags)
   const skipNode = calculateSkipChildren(includeTags, excludeTags, parsedIncludeTagsSet, parsedExcludeTagsSet, uniqueTags, isDescribeNode, envVars);
 
   // Create a new node removing the tag list as the first argument
