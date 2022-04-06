@@ -16,6 +16,9 @@ const generateConfig = () => {
 const resetConfig = (config: Cypress.PluginConfigOptions) => {
   delete config.env.CYPRESS_INCLUDE_TAGS;
   delete config.env.CYPRESS_EXCLUDE_TAGS;
+  delete config.env.CYPRESS_USE_INCLUDE_EXCLUDE_EXPRESSIONS;
+  delete config.env.CYPRESS_INCLUDE_EXPRESSION;
+  delete config.env.CYPRESS_EXCLUDE_EXPRESSION;
 };
 
 const tagify = (config: Cypress.PluginConfigOptions, fileName: string, output: string[] = []): Promise<string[]> => {
@@ -38,7 +41,7 @@ const tagify = (config: Cypress.PluginConfigOptions, fileName: string, output: s
       let data = ''
       function ondata(d: string) { data += d }
       function onend() {
-        const lines = data.split('\n')
+        const lines = data.split(/\r?\n/)
         const startline = lines.indexOf('// sample start') + 1;
         const endline = lines.length - 3;
 
