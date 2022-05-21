@@ -4,7 +4,6 @@ import through from 'through';
 import ts, { factory } from 'typescript';
 
 import browserify from '@cypress/browserify-preprocessor';
-// @ts-ignore:next-line
 import booleanParser from 'boolean-parser';
 
 const isTestBlock = (name: string) => (node: ts.CallExpression | ts.PropertyAccessExpression) => {
@@ -74,7 +73,10 @@ const extractEnvVars = (config: Cypress.PluginConfigOptions): EnvVars => {
   };
 };
 
-const calculateParsedTagSetMatch = (parsedExpressionTagSet:string[][], tags:string[]) => {
+const calculateParsedTagSetMatch = (parsedExpressionTagSet:string[][], tags:string[], includeOrExclude: 'include'|'exclude') => {
+  if(parsedExpressionTagSet.length==0) {
+    return includeOrExclude==='include';
+  }
   for(let expressionTags of parsedExpressionTagSet){
     if(expressionTags.every(tag => tags.includes(tag))){
       return true;
@@ -94,12 +96,12 @@ const calculateSkipChildren = (
   envVars: EnvVars
 ): boolean => {
   // Don't perform include test on describe nodes, allow the result to fall through into inner nodes
-  const includeTest = envVars.useIncludeExcludeExpressions ? isDescribeNode || calculateParsedTagSetMatch(parsedIncludeTagsSet, tags) : isDescribeNode || includeTags.length === 0
+  const includeTest = envVars.useIncludeExcludeExpressions ? isDescribeNode || calculateParsedTagSetMatch(parsedIncludeTagsSet, tags, 'include') : isDescribeNode || includeTags.length === 0
     || (envVars.includeUseBooleanAnd
       ? includeTags.every(tag => tags.includes(tag))
       : tags.some(tag => includeTags.includes(tag))
     );
-  const excludeTest = envVars.useIncludeExcludeExpressions ? calculateParsedTagSetMatch(parsedExcludeTagsSet, tags) : excludeTags.length > 0
+  const excludeTest = envVars.useIncludeExcludeExpressions ? calculateParsedTagSetMatch(parsedExcludeTagsSet, tags, 'exclude') : excludeTags.length > 0
     && (envVars.excludeUseBooleanAnd
       ? excludeTags.every(tag => tags.includes(tag))
       : tags.some(tag => excludeTags.includes(tag))

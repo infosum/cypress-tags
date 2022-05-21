@@ -238,4 +238,30 @@ describe('String tags', function () {
       ]);
     });
   });
+
+  describe('Only Exclude expression provided', () => {
+    before(async () => {
+      config.env.CYPRESS_USE_INCLUDE_EXCLUDE_EXPRESSIONS = true;
+      // config.env.CYPRESS_INCLUDE_EXPRESSION = 'smoke OR regression';
+      config.env.CYPRESS_EXCLUDE_EXPRESSION = 'wip';
+      output = await tagify(config, 'string');
+    });
+
+    it('should output all tests without tags', function () {
+      expect(output).to.deep.equal([
+        "describe('Run tests with no tags', () => {",
+        "    it('I am a regular test', () => { });",
+        "});",
+        ";",
+        "describe('Run tests with tagged it statements', () => {",
+        "    ;",
+        "    it('I am a smoke & regression test', () => { });",
+        "    it('I am a regression test', () => { });",
+        "    it('I am a smoke test', () => { });",
+        "    ;",
+        "    ;",
+        "});",
+      ]);
+    });
+  });
 });
