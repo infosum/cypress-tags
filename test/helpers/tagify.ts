@@ -2,7 +2,7 @@ import browserify from 'browserify';
 import through from 'through';
 
 // @ts-ignore
-const transform = require('../../dist').transform;
+const transform = require("../../dist").transform;
 
 const generateConfig = () => {
   return {
@@ -24,22 +24,22 @@ const resetConfig = (config: Cypress.PluginConfigOptions) => {
 const tagify = (config: Cypress.PluginConfigOptions, fileName: string, output: string[] = []): Promise<string[]> => {
   return new Promise((resolve, reject) => {
     const options = {
-      typescript: require.resolve('typescript'),
-      extensions: ['.js', '.ts'],
-      plugin: [
-        ['tsify']
-      ],
+      typescript: require.resolve("typescript"),
+      extensions: [".js", ".ts"],
+      plugin: [["tsify"]],
     };
 
     try {
       browserify(options)
         .transform((fileName: string) => transform(fileName, config))
-        .add(`${__dirname}/../../cypress/integration/${fileName}.spec.ts`)
+        .add(`${__dirname}/../../cypress/e2e/${fileName}.cy.ts`)
         .bundle()
         .pipe(through(ondata, onend));
 
-      let data = ''
-      function ondata(d: string) { data += d }
+      let data = "";
+      function ondata(d: string) {
+        data += d;
+      }
       function onend() {
         const lines = data.split(/\r?\n/)
         const startline = lines.indexOf('// sample start') + 1;
@@ -54,8 +54,4 @@ const tagify = (config: Cypress.PluginConfigOptions, fileName: string, output: s
   });
 };
 
-export {
-  generateConfig,
-  resetConfig,
-  tagify,
-};
+export { generateConfig, resetConfig, tagify };
