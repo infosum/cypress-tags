@@ -15,15 +15,16 @@ This plugin uses TypeScript to parse the tests, so you will need `typescript` in
 Add the preprocessor to your plugins file.
 
 ```ts
-// cypress/plugins/index.js
-const tagify = require('cypress-tags');
+// cypress.config.ts
+import { tagify } from "cypress-tags";
 
-/**
- * @type {Cypress.PluginConfig}
- */
-module.exports = (on, config) => {
-  on('file:preprocessor', tagify(config));
-};
+export default defineConfig({
+  e2e: {
+    setupNodeEvents(on, config) {
+      on("file:preprocessor", tagify(config));
+    },
+  },
+});
 ```
 
 Reference `cypress-tags` instead of `cypress` to get the new type definitions.
@@ -45,19 +46,19 @@ it(['wip'], 'This is a work-in-progress test', function () { ... });
 
 Select tests by passing a comma separated list of tags to the Cypress environment variable `CYPRESS_INCLUDE_TAGS`.
 
-```bash
+```sh
 CYPRESS_INCLUDE_TAGS=smoke,regression npx cypress run
 ```
 
 Skip tests by passing a comma separated list of tags to the Cypress environment variable `CYPRESS_EXCLUDE_TAGS`.
 
-```bash
+```sh
 CYPRESS_EXCLUDE_TAGS=wip npx cypress run
 ```
 
 Combine the two for more complex testing strategies.
 
-```bash
+```sh
 CYPRESS_INCLUDE_TAGS=smoke,regression CYPRESS_EXCLUDE_TAGS=wip npx cypress run
 ```
 
@@ -71,7 +72,7 @@ These will only include or exclude a test if it matches **all** the tags passed 
 
 Set the environment variables to true to trigger this behaviour:
 
-```bash
+```sh
 CYPRESS_INCLUDE_USE_BOOLEAN_AND=true CYPRESS_INCLUDE_TAGS=smoke,regression npx cypress run
 CYPRESS_EXCLUDE_USE_BOOLEAN_AND=true CYPRESS_EXCLUDE_TAGS=smoke,regression npx cypress run
 ```
@@ -110,17 +111,17 @@ If you have tags defines on an enum you can use them in your tags list.
 
 ```ts
 enum Tag {
-  'WIP' = 0,
-  'REGRESSION' = 1,
-  'SMOKE' = 2,
-  'FEATURE' = 3,
-};
+  "WIP" = 0,
+  "REGRESSION" = 1,
+  "SMOKE" = 2,
+  "FEATURE" = 3,
+}
 
-describe([Tag.WIP], 'Run tests with tagged describe block', () => {
-  it('I will become a wip test', () => {});
-  it([Tag.FEATURE], 'I will also become a wip test', () => {});
-  it([Tag.WIP], 'I am already a wip test', () => {});
-  it.skip('I should always be skipped', () => {});
+describe([Tag.WIP], "Run tests with tagged describe block", () => {
+  it("I will become a wip test", () => {});
+  it([Tag.FEATURE], "I will also become a wip test", () => {});
+  it([Tag.WIP], "I am already a wip test", () => {});
+  it.skip("I should always be skipped", () => {});
 });
 ```
 
@@ -130,7 +131,7 @@ This means to run the tests above tagged with `Tag.WIP` you would use the string
 
 For example:
 
-```bash
+```sh
 CYPRESS_INCLUDE_TAGS=WIP npx cypress run
 ```
 
@@ -139,18 +140,19 @@ CYPRESS_INCLUDE_TAGS=WIP npx cypress run
 If you want to manipulate your environment variables before passing them into the preprocessor, you can set the new env vars to use on `config.env.CYPRESS_INCLUDE_TAGS` and `config.env.CYPRESS_EXCLUDE_TAGS`.
 
 ```ts
-// cypress/plugins/index.js
-const tagify = require('cypress-tags');
+// cypress.config.ts
+import { tagify } from "cypress-tags";
 
-/**
- * @type {Cypress.PluginConfig}
- */
-module.exports = (on, config) => {
-  config.env.CYPRESS_INCLUDE_TAGS = 'custom,include,tags';
-  config.env.CYPRESS_EXCLUDE_TAGS = 'wip';
+export default defineConfig({
+  e2e: {
+    setupNodeEvents(on, config) {
+      config.env.CYPRESS_INCLUDE_TAGS = "custom,include,tags";
+      config.env.CYPRESS_EXCLUDE_TAGS = "wip";
 
-  on('file:preprocessor', tagify(config));
-};
+      on("file:preprocessor", tagify(config));
+    },
+  },
+});
 ```
 
 ## Gotchas
@@ -161,8 +163,8 @@ As the file preprocessor runs before the Typescript file has been evaluated, you
 
 This means that in an example test as shown below:
 
-```
-  it([generateTagName()], 'I will also become a wip test', () => {});
+```ts
+it([generateTagName()], "I will also become a wip test", () => {});
 ```
 
 The `generateTagName()` function will not resolve before the tests are filtered out. The typescript code itself will be passed into the Typescript Compiler API and the generated AST will be different to what is expected by the plugin.
@@ -171,16 +173,16 @@ The `generateTagName()` function will not resolve before the tests are filtered 
 
 Environment variables need to be defined before running your tests, this can either be set inline or via an external file such as your `.bashrc`.
 
-If you are a Windows user the example commands may not work for you (which assume you are executing cypress from the bash or git bash terminal, both of which accept you passing env variables before executing cypress. The windows terminal, CMD, or Powershell don't). You may need to use the Windows [set](https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/set_1) command instead, 
+If you are a Windows user the example commands may not work for you (which assume you are executing cypress from the bash or git bash terminal, both of which accept you passing env variables before executing cypress. The windows terminal, CMD, or Powershell don't). You may need to use the Windows [set](https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/set_1) command instead,
 
 For example:
 
-```
+```sh
 set CYPRESS_INCLUDE_TAGS=smoke npx cypress run
 ```
 
 or an easier option, move the CYPRESS_INCLUDE_TAGS variable and put it after the --env option
 
-```
+```sh
 npx cypress run --env CYPRESS_INCLUDE_TAGS=smoke
 ```
