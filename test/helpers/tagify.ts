@@ -31,7 +31,7 @@ const tagify = (config: Cypress.PluginConfigOptions, fileName: string, output: s
     try {
       browserify(options)
         .transform((fileName: string) => transform(fileName, config))
-        .add(`${__dirname}/../../cypress/integration/${fileName}.spec.ts`)
+        .add(`${__dirname}/../../cypress/e2e/${fileName}.cy.ts`)
         .bundle()
         .pipe(through(ondata, onend));
 
