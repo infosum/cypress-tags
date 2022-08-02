@@ -1,3 +1,5 @@
+/// <reference path='../../dist/index.d.ts' />
+
 // sample start
 describe('Unskipped describe', () => {
   xit('Skipped test', () => { });

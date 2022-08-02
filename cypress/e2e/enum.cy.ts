@@ -1,3 +1,5 @@
+/// <reference path='../../dist/index.d.ts' />
+
 export enum Tag {
   'WIP' = 0,
   'REGRESSION' = 1,
