@@ -1,3 +1,5 @@
+/// <reference path='../../dist/index.d.ts' />
+
 // sample start
 describe('Run tests with no tags', () => {
   it('I am a regular test', () => {});

@@ -1,3 +1,5 @@
+/// <reference path='../../dist/index.d.ts' />
+
 // sample start
 const foo = 'bar';
 
