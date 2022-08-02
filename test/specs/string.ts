@@ -152,7 +152,7 @@ describe('String tags', function () {
       ]);
     });
   });
-  
+
   describe('Simple include expression with AND provided', () => {
     before(async () => {
       config.env.CYPRESS_USE_INCLUDE_EXCLUDE_EXPRESSIONS = true;
@@ -182,7 +182,7 @@ describe('String tags', function () {
       ]);
     });
   });
-  
+
   describe('Simple include expression with OR provided', () => {
     before(async () => {
       config.env.CYPRESS_USE_INCLUDE_EXCLUDE_EXPRESSIONS = true;
@@ -242,7 +242,6 @@ describe('String tags', function () {
   describe('Only Exclude expression provided', () => {
     before(async () => {
       config.env.CYPRESS_USE_INCLUDE_EXCLUDE_EXPRESSIONS = true;
-      // config.env.CYPRESS_INCLUDE_EXPRESSION = 'smoke OR regression';
       config.env.CYPRESS_EXCLUDE_EXPRESSION = 'wip';
       output = await tagify(config, 'string');
     });
