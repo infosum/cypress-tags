@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.0] - 2022-08-2
+
+### Changed
+
+- Updated to Cypress v10 and other dependancies to latest. Closes [179](https://github.com/annaet/cypress-tags/issues/179).
+- Added support for boolean expressions. Closes [166](https://github.com/annaet/cypress-tags/issues/166).
+
 ## [0.3.0] - 2021-09-27
 
 ### Changed
