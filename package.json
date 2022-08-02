@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "@cypress/browserify-preprocessor": "^3.0.1",
+    "boolean-parser": "0.0.2",
     "through": "^2.3.8"
   },
   "devDependencies": {

@@ -1,5 +1,6 @@
 /// <reference path="../types/index.d.ts" />
 
+import booleanParser from 'boolean-parser';
 import through from 'through';
 import ts, { factory } from 'typescript';
 
@@ -40,38 +41,70 @@ const extractTags = (config: Cypress.PluginConfigOptions) => {
   };
 };
 
+const extractExpressionTags = (config: Cypress.PluginConfigOptions) => {
+  const includeExpression = config.env.CYPRESS_INCLUDE_EXPRESSION ?? process.env.CYPRESS_INCLUDE_EXPRESSION;
+  const excludeExpression = config.env.CYPRESS_EXCLUDE_EXPRESSION ?? process.env.CYPRESS_EXCLUDE_EXPRESSION;
+  const parsedIncludeTagsSet = includeExpression ? booleanParser.parseBooleanQuery(includeExpression) : [];
+  const parsedExcludeTagsSet = excludeExpression ? booleanParser.parseBooleanQuery(excludeExpression) : [];
+
+
+  return {
+    parsedIncludeTagsSet,
+    parsedExcludeTagsSet
+  }
+}
+
 interface EnvVars {
   includeUseBooleanAnd: boolean;
   excludeUseBooleanAnd: boolean;
+  useIncludeExcludeExpressions: boolean;
 }
 
 // Convert tags from comma delimitered environment variables to string arrays
 const extractEnvVars = (config: Cypress.PluginConfigOptions): EnvVars => {
   const includeUseBooleanAnd = config.env.CYPRESS_INCLUDE_USE_BOOLEAN_AND ?? process.env.CYPRESS_INCLUDE_USE_BOOLEAN_AND;
   const excludeUseBooleanAnd = config.env.CYPRESS_EXCLUDE_USE_BOOLEAN_AND ?? process.env.CYPRESS_EXCLUDE_USE_BOOLEAN_AND;
+  const useIncludeExcludeExpressions = config.env.CYPRESS_USE_INCLUDE_EXCLUDE_EXPRESSIONS ?? process.env.CYPRESS_USE_INCLUDE_EXCLUDE_EXPRESSIONS;
 
   return {
     includeUseBooleanAnd,
     excludeUseBooleanAnd,
+    useIncludeExcludeExpressions
   };
 };
+
+const calculateParsedTagSetMatch = (parsedExpressionTagSet: string[][], tags: string[], includeOrExclude: 'include' | 'exclude') => {
+  if (parsedExpressionTagSet.length == 0) {
+    return includeOrExclude === 'include';
+  }
+  for (let expressionTags of parsedExpressionTagSet) {
+    if (expressionTags.every(tag => tags.includes(tag))) {
+      return true;
+    }
+  }
+  return false;
+}
 
 // Use include and exclude tags to determine if current node should be skipped
 const calculateSkipChildren = (
   includeTags: string[],
   excludeTags: string[],
+  parsedIncludeTagsSet: string[][],
+  parsedExcludeTagsSet: string[][],
   tags: string[],
   isDescribeNode: boolean,
   envVars: EnvVars
 ): boolean => {
   // Don't perform include test on describe nodes, allow the result to fall through into inner nodes
-  const includeTest = isDescribeNode || includeTags.length === 0
-    || (envVars.includeUseBooleanAnd
+  const includeTest = envVars.useIncludeExcludeExpressions
+    ? isDescribeNode || calculateParsedTagSetMatch(parsedIncludeTagsSet, tags, 'include')
+    : isDescribeNode || includeTags.length === 0 || (envVars.includeUseBooleanAnd
       ? includeTags.every(tag => tags.includes(tag))
       : tags.some(tag => includeTags.includes(tag))
     );
-  const excludeTest = excludeTags.length > 0
-    && (envVars.excludeUseBooleanAnd
+  const excludeTest = envVars.useIncludeExcludeExpressions
+    ? calculateParsedTagSetMatch(parsedExcludeTagsSet, tags, 'exclude')
+    : excludeTags.length > 0 && (envVars.excludeUseBooleanAnd
       ? excludeTags.every(tag => tags.includes(tag))
       : tags.some(tag => excludeTags.includes(tag))
     );
@@ -85,6 +118,8 @@ const removeTagsFromNode = (
   parentTags: string[],
   includeTags: string[],
   excludeTags: string[],
+  parsedIncludeTagsSet: string[][],
+  parsedExcludeTagsSet: string[][],
   isDescribeNode: boolean,
   envVars: EnvVars
 ): {
@@ -126,7 +161,7 @@ const removeTagsFromNode = (
 
   // Create unique list of tags from current node and parents
   const uniqueTags = [...new Set([...nodeTags, ...parentTags])];
-  const skipNode = calculateSkipChildren(includeTags, excludeTags, uniqueTags, isDescribeNode, envVars);
+  const skipNode = calculateSkipChildren(includeTags, excludeTags, parsedIncludeTagsSet, parsedExcludeTagsSet, uniqueTags, isDescribeNode, envVars);
 
   // Create a new node removing the tag list as the first argument
   const newArgs: ts.NodeArray<ts.Expression> = factory.createNodeArray([...node.arguments.slice(1)]);
@@ -142,6 +177,8 @@ const removeTagsFromNode = (
 // Transform TypeScript AST to filter tests and remove tag arguments to make compatible with Cypress types
 const transformer = (config: Cypress.PluginConfigOptions) => <T extends ts.Node>(context: ts.TransformationContext) => (rootNode: T) => {
   const { includeTags, excludeTags } = extractTags(config);
+  const { parsedIncludeTagsSet, parsedExcludeTagsSet } = extractExpressionTags(config);
+
   const envVars = extractEnvVars(config);
 
   const visit = (node: ts.Node, parentTags?: string[]): ts.Node | undefined => {
@@ -162,7 +199,7 @@ const transformer = (config: Cypress.PluginConfigOptions) => <T extends ts.Node>
           // Describe / Context block
           if (firstArgIsTag || ts.isArrayLiteralExpression(firstArg)) {
             // First arg is single tag or tags list
-            const result = removeTagsFromNode(node, tags, includeTags, excludeTags, true, envVars);
+            const result = removeTagsFromNode(node, tags, includeTags, excludeTags, parsedIncludeTagsSet, parsedExcludeTagsSet, true, envVars);
             skipNode = result.skipNode;
             returnNode = result.node;
             tags = result.tags;
@@ -171,12 +208,12 @@ const transformer = (config: Cypress.PluginConfigOptions) => <T extends ts.Node>
           // It block
           if (firstArgIsTag || ts.isArrayLiteralExpression(firstArg)) {
             // First arg is single tag or tags list
-            const result = removeTagsFromNode(node, tags, includeTags, excludeTags, false, envVars);
+            const result = removeTagsFromNode(node, tags, includeTags, excludeTags, parsedIncludeTagsSet, parsedExcludeTagsSet, false, envVars);
             skipNode = result.skipNode;
             returnNode = result.node;
           } else if (isTitle(firstArg)) {
             // First arg is title
-            skipNode = calculateSkipChildren(includeTags, excludeTags, tags, false, envVars);
+            skipNode = calculateSkipChildren(includeTags, excludeTags, parsedIncludeTagsSet, parsedExcludeTagsSet, tags, false, envVars);
           }
         }
       };

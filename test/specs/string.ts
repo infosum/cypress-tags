@@ -152,4 +152,115 @@ describe('String tags', function () {
       ]);
     });
   });
+
+  describe('Simple include expression with AND provided', () => {
+    before(async () => {
+      config.env.CYPRESS_USE_INCLUDE_EXCLUDE_EXPRESSIONS = true;
+      config.env.CYPRESS_INCLUDE_EXPRESSION = 'smoke AND regression';
+      output = await tagify(config, 'string');
+    });
+
+    it('should output all tests without tags', function () {
+      expect(output).to.deep.equal([
+        "describe('Run tests with no tags', () => {",
+        '    ;',
+        '});',
+        "describe('Run tests with tagged describe block', () => {",
+        '    ;',
+        '    ;',
+        '    ;',
+        '    ;',
+        '});',
+        "describe('Run tests with tagged it statements', () => {",
+        '    ;',
+        "    it('I am a smoke & regression test', () => { });",
+        '    ;',
+        '    ;',
+        '    ;',
+        "    it.skip('I have tags and should always be skipped', () => { });",
+        '});'
+      ]);
+    });
+  });
+
+  describe('Simple include expression with OR provided', () => {
+    before(async () => {
+      config.env.CYPRESS_USE_INCLUDE_EXCLUDE_EXPRESSIONS = true;
+      config.env.CYPRESS_INCLUDE_EXPRESSION = 'smoke OR regression';
+      output = await tagify(config, 'string');
+    });
+
+    it('should output all tests without tags', function () {
+      expect(output).to.deep.equal([
+        "describe('Run tests with no tags', () => {",
+        '    ;',
+        '});',
+        "describe('Run tests with tagged describe block', () => {",
+        '    ;',
+        '    ;',
+        '    ;',
+        '    ;',
+        '});',
+        "describe('Run tests with tagged it statements', () => {",
+        '    ;',
+        "    it('I am a smoke & regression test', () => { });",
+        "    it('I am a regression test', () => { });",
+        "    it('I am a smoke test', () => { });",
+        "    it('I am a wip smoke test', () => { });",
+        "    it.skip('I have tags and should always be skipped', () => { });",
+        '});'
+      ]);
+    });
+  });
+
+  describe('Simple include and exclude Expression', () => {
+    before(async () => {
+      config.env.CYPRESS_USE_INCLUDE_EXCLUDE_EXPRESSIONS = true;
+      config.env.CYPRESS_INCLUDE_EXPRESSION = 'smoke OR regression';
+      config.env.CYPRESS_EXCLUDE_EXPRESSION = 'wip';
+      output = await tagify(config, 'string');
+    });
+
+    it('should output all tests without tags', function () {
+      expect(output).to.deep.equal([
+        "describe('Run tests with no tags', () => {",
+        '    ;',
+        '});',
+        ';',
+        "describe('Run tests with tagged it statements', () => {",
+        '    ;',
+        "    it('I am a smoke & regression test', () => { });",
+        "    it('I am a regression test', () => { });",
+        "    it('I am a smoke test', () => { });",
+        '    ;',
+        '    ;',
+        '});'
+      ]);
+    });
+  });
+
+  describe('Only Exclude expression provided', () => {
+    before(async () => {
+      config.env.CYPRESS_USE_INCLUDE_EXCLUDE_EXPRESSIONS = true;
+      config.env.CYPRESS_EXCLUDE_EXPRESSION = 'wip';
+      output = await tagify(config, 'string');
+    });
+
+    it('should output all tests without tags', function () {
+      expect(output).to.deep.equal([
+        "describe('Run tests with no tags', () => {",
+        "    it('I am a regular test', () => { });",
+        "});",
+        ";",
+        "describe('Run tests with tagged it statements', () => {",
+        "    ;",
+        "    it('I am a smoke & regression test', () => { });",
+        "    it('I am a regression test', () => { });",
+        "    it('I am a smoke test', () => { });",
+        "    ;",
+        "    ;",
+        "});",
+      ]);
+    });
+  });
 });

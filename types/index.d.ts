@@ -10,6 +10,7 @@
 /// <reference types="cypress" />
 
 declare module '@cypress/browserify-preprocessor';
+declare module 'boolean-parser';
 
 // Add tags to mocha definitions
 declare namespace Mocha {
