@@ -292,4 +292,6 @@ const preprocessor = (config: Cypress.PluginConfigOptions) => {
 
 preprocessor.transform = transform;
 
+export { preprocessor as tagify };
+
 module.exports = preprocessor;
