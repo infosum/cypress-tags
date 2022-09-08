@@ -254,7 +254,7 @@ const processFile = (fileName: string, source: string, config: Cypress.PluginCon
   return result;
 };
 
-const transform = (fileName: string, config: Cypress.PluginConfigOptions) => {
+export const transform = (fileName: string, config: Cypress.PluginConfigOptions) => {
   let data = '';
 
   function ondata(d: through.ThroughStream) {
