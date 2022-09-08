@@ -1,8 +1,7 @@
 import browserify from 'browserify';
 import through from 'through';
 
-// @ts-ignore
-const transform = require('../../dist').transform;
+import { transform } from '../../dist';
 
 const generateConfig = () => {
   return {

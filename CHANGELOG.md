@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.2] - 2022-09-08
+
+### Changed
+
+- Remove module.exports preventing `tagify` function from exporting correctly. Closes [211](https://github.com/annaet/cypress-tags/issues/211).
+
 ## [1.0.1] - 2022-09-06
 
 ### Changed
