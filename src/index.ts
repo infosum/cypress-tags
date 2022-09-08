@@ -290,8 +290,4 @@ const preprocessor = (config: Cypress.PluginConfigOptions) => {
   return browserify(options);
 };
 
-preprocessor.transform = transform;
-
 export { preprocessor as tagify };
-
-module.exports = preprocessor;
