@@ -12,7 +12,7 @@ This plugin uses TypeScript to parse the tests, so you will need `typescript` in
 
 ## Setup
 
-Add the preprocessor to your plugins file.
+Add the preprocessor to your Cypress config file.
 
 ```ts
 // cypress.config.ts
