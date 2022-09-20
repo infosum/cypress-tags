@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.0] - 2022-09-20
+
+### Changed
+
+- Enable `cypress-tags` to be used with Cypress v6 and upwards. Closes [216](https://github.com/annaet/cypress-tags/issues/216).
+- Updated dependencies.
+
 ## [1.0.2] - 2022-09-08
 
 ### Changed
