@@ -23,7 +23,7 @@
   "postversion": "git push && git push --tags",
   "repository": {
     "type": "git",
-    "url": "https://github.com/annaet/cypress-tags.git"
+    "url": "https://github.com/infosum/cypress-tags.git"
   },
   "dependencies": {
     "@cypress/browserify-preprocessor": "^3.0.1",
