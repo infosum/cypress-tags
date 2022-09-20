@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.1] - 2022-09-20
+
+### Changed
+
+- Transfer ownership from `annaet` to `infosum` and update repo links.
+
 ## [1.1.0] - 2022-09-20
 
 ### Changed
