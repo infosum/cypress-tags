@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.2] - 2022-09-21
+
+### Changed
+
+- Fix broken build. Closes [225](https://github.com/infosum/cypress-tags/issues/225).
+
 ## [1.1.1] - 2022-09-20
 
 ### Changed
