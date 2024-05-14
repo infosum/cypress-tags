@@ -4,8 +4,8 @@
   ],
   "spec": "test/**/*.ts",
   "require": [
-    "ts-node/register",
-    "source-map-support/register"
+    "ts-node/register"
   ],
-  "recursive": true
+  "recursive": true,
+  "timeout": 5000
 }

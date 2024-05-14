@@ -10,7 +10,7 @@
     "watch": "tsc -w",
     "cy:open": "cypress open",
     "cy:run": "cypress run",
-    "test": "npm run cy:run && NODE_OPTIONS=--loader ts-node/esm mocha"
+    "test": "npm run cy:run && mocha"
   },
   "author": "Anna Thomas",
   "license": "ISC",
@@ -35,7 +35,7 @@
     "@types/mocha": "^10.0.6",
     "@types/node": "^20.12.12",
     "@types/through": "0.0.30",
-    "chai": "^5.1.1",
+    "chai": "^4.3.16",
     "mocha": "^10.4.0",
     "ts-node": "^10.9.2",
     "tsify": "^5.0.4",
