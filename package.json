@@ -10,8 +10,7 @@
     "watch": "tsc -w",
     "cy:open": "cypress open",
     "cy:run": "cypress run",
-    "mocha:run": "mocha -r ts-node/register --spec test/specs/*.ts --timeout 5000",
-    "test": "npm run cy:run && npm run mocha:run"
+    "test": "npm run cy:run && NODE_OPTIONS=--loader ts-node/esm mocha"
   },
   "author": "Anna Thomas",
   "license": "ISC",

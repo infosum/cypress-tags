@@ -1,0 +1,11 @@
+{
+  "extension": [
+    "ts"
+  ],
+  "spec": "test/**/*.ts",
+  "require": [
+    "ts-node/register",
+    "source-map-support/register"
+  ],
+  "recursive": true
+}
