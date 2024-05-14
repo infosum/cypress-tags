@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0] - 2024-05-14
+
+### Changed
+
+- Upgrade dependencies to latest. Closes [262](https://github.com/infosum/cypress-tags/issues/262).
+
 ## [1.1.2] - 2022-09-21
 
 ### Changed
