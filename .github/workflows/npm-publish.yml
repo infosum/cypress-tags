@@ -16,6 +16,7 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
       - name: Authenticate with private NPM package
         run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+      - run: npm adduser
       - name: Publish to npm
         run: npm publish --provenance --access public
         env:
