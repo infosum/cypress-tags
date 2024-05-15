@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.1] - 2024-05-15
+
+### Changed
+
+- Add npm publish action. Closes [264](https://github.com/infosum/cypress-tags/issues/264).
+
 ## [1.2.0] - 2024-05-14
 
 ### Changed
