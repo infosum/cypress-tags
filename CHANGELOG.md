@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.6] - 2024-05-15
+
+### Changed
+
+- Use JS-DevTools/npm-publish@v3 to publish. Closes [264](https://github.com/infosum/cypress-tags/issues/264).
+
 ## [1.2.5] - 2024-05-15
 
 ### Changed

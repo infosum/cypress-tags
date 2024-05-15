@@ -1,23 +1,18 @@
-name: Publish Package to npmjs
 on:
   push:
     branches: [ master ]
+
 jobs:
-  build:
+  publish:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      # Setup .npmrc file to publish to npm
-      - name: Setup .npmrc
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v3
         with:
-          node-version: '20.x'
-          registry-url: 'https://registry.npmjs.org'
-      - name: Authenticate with private NPM package
-        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
-      - run: npm adduser
-      - name: Publish to npm
-        run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          node-version: "20"
+      - run: npm ci
+      - run: npm test
+      - uses: JS-DevTools/npm-publish@v3
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
+          
