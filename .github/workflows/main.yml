@@ -23,6 +23,7 @@ jobs:
 
       - name: Check version changes
         uses: EndBug/version-check@v2
+        id: check
 
       - if: steps.check.outputs.changed == 'false'
         run:  |
