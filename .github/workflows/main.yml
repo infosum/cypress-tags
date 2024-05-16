@@ -26,6 +26,7 @@ jobs:
         id: check
         
       - name: Install Dependencies
+        if: steps.check.outputs.changed == 'true'
         run: npm install
 
       - name: Install Peer Dependencies
