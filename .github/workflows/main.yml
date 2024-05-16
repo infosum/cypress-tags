@@ -25,8 +25,9 @@ jobs:
         uses: EndBug/version-check@v2
 
       - if: steps.check.outputs.changed == 'false'
-        run:  echo "Version change has not been implemented"
-            exit 1
+        run:  |
+          gh run cancel ${{ github.run_id }}
+          gh run watch ${{ github.run_id }}
         
       - name: Install Dependencies
         run: npm install
