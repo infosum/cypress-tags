@@ -25,7 +25,7 @@ jobs:
         uses: EndBug/version-check@v2
         id: check
         with:
-          file-url: https://unpkg.com/your-package@latest/package.json
+          file-url: https://unpkg.com/cypress-tags@latest/package.json
           static-checking: localIsNew
 
       - if: steps.check.outputs.changed == 'false'
