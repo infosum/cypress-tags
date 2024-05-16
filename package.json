@@ -1,6 +1,6 @@
 {
   "name": "cypress-tags",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Use custom tags to slice up Cypress test runs.",
   "type": "commonjs",
   "main": "dist/index.js",
