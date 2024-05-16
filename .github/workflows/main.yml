@@ -20,6 +20,18 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Check version changes
+        uses: EndBug/version-check@v2
+        id: check
+        with:
+          file-url: https://unpkg.com/cypress-tags@latest/package.json
+          static-checking: localIsNew
+
+      - if: steps.check.outputs.changed == 'false'
+        run:  |
+          gh run cancel ${{ github.run_id }}
+          gh run watch ${{ github.run_id }}
         
       - name: Install Dependencies
         run: npm install
